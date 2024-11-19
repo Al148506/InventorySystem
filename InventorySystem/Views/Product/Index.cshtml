@@ -1,0 +1,59 @@
+﻿@model List<Product>
+    <h1>Productos</h1>
+    <p>
+        <a asp-controller="Product"
+           asp-action="Create"
+           class="btn btn-success">
+            Crear
+        </a>
+    </p>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>State</th>
+                <th>Location</th>
+                <th>Image</th>
+                <th>CreationDate</th>
+                <th>LastModDate</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td> @Html.DisplayFor(m => product.ProductName)</td>
+
+                    <td> @Html.DisplayFor(m => product.Category.CategoryName)</td>
+
+                    <td> @Html.DisplayFor(m => product.Description)</td>
+
+                    <td> @Html.DisplayFor(m => product.Quantity)</td>
+
+                    <td> @Html.DisplayFor(m => product.State)</td>
+
+                    <td> @Html.DisplayFor(m => product.Location.LocationName)</td>
+
+                    <td>
+                        @if (!string.IsNullOrEmpty(product.ImageRoot))
+                        {
+                            <img src="@product.ImageRoot" alt="Product Image" style="width: 100px; height: auto;" />
+                        }
+                        else
+                        {
+                            <span>No image</span>
+                        }
+                    </td>
+
+                    <td> @Html.DisplayFor(m => product.CreationDate)</td>
+
+                    <td> @Html.DisplayFor(m => product.LastModDate)</td>
+                </tr>
+
+            }
+        </tbody>
+       
+    </table>
