@@ -1,59 +1,113 @@
 ﻿@model List<Product>
-    <h1>Productos</h1>
-    <p>
-        <a asp-controller="Product"
-           asp-action="Create"
-           class="btn btn-success">
-            Crear
-        </a>
-    </p>
-    <table class="table table-bordered">
-        <thead>
+<h1>Productos</h1>
+<p>
+    <a asp-controller="Product"
+       asp-action="Create"
+       class="btn btn-success">
+        Crear
+    </a>
+</p>
+<form method="get" asp-action="Index">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="searchName">Nombre del Producto</label>
+                <input type="text" name="searchName" class="form-control" placeholder="Buscar por nombre...">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="categoryId">Categoría</label>
+                <select name="categoryId" class="form-control" asp-items="ViewBag.Category">
+                    <option value="">-- Seleccione --</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="locationId">Ubicación</label>
+                <select name="locationId" class="form-control" asp-items="ViewBag.Location">
+                    <option value="">-- Seleccione --</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn btn-primary form-control">Buscar</button>
+            </div>
+        </div>
+    </div>
+</form>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Quantity</th>
+            <th>State</th>
+            <th>Location</th>
+            <th>Image</th>
+            <th>CreationDate</th>
+            <th>LastModDate</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model)
+        {
             <tr>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Description</th>
-                <th>Quantity</th>
-                <th>State</th>
-                <th>Location</th>
-                <th>Image</th>
-                <th>CreationDate</th>
-                <th>LastModDate</th>
+                <td> @Html.DisplayFor(m => product.ProductName)</td>
+
+                <td> @Html.DisplayFor(m => product.Category.CategoryName)</td>
+
+                <td> @Html.DisplayFor(m => product.Description)</td>
+
+                <td> @Html.DisplayFor(m => product.Quantity)</td>
+
+                <td> @Html.DisplayFor(m => product.State)</td>
+
+                <td> @Html.DisplayFor(m => product.Location.LocationName)</td>
+
+                <td>
+                    @if (!string.IsNullOrEmpty(product.ImageRoot))
+                    {
+                        <img src="@product.ImageRoot" alt="Product Image" style="width: 100px; height: auto;" />
+                    }
+                    else
+                    {
+                        <span>No image</span>
+                    }
+                </td>
+
+                <td> @Html.DisplayFor(m => product.CreationDate)</td>
+
+                <td> @Html.DisplayFor(m => product.LastModDate)</td>
+                <td>
+                    <a asp-controller="Product"
+                       asp-action="Edit"
+                       asp-route-id="@product.IdProd"
+                       class="btn btn-primary">
+                        Editar
+                    </a>
+                    <a asp-controller="Product"
+                       asp-action="Delete"
+                       asp-route-id="@product.IdProd"
+                       onclick="return confirmar()"
+                       class="btn btn-danger">
+                        Eliminar
+                    </a>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var product in Model)
-            {
-                <tr>
-                    <td> @Html.DisplayFor(m => product.ProductName)</td>
 
-                    <td> @Html.DisplayFor(m => product.Category.CategoryName)</td>
-
-                    <td> @Html.DisplayFor(m => product.Description)</td>
-
-                    <td> @Html.DisplayFor(m => product.Quantity)</td>
-
-                    <td> @Html.DisplayFor(m => product.State)</td>
-
-                    <td> @Html.DisplayFor(m => product.Location.LocationName)</td>
-
-                    <td>
-                        @if (!string.IsNullOrEmpty(product.ImageRoot))
-                        {
-                            <img src="@product.ImageRoot" alt="Product Image" style="width: 100px; height: auto;" />
-                        }
-                        else
-                        {
-                            <span>No image</span>
-                        }
-                    </td>
-
-                    <td> @Html.DisplayFor(m => product.CreationDate)</td>
-
-                    <td> @Html.DisplayFor(m => product.LastModDate)</td>
-                </tr>
-
-            }
-        </tbody>
-       
-    </table>
+        }
+    </tbody>
+</table>
+@section Scripts{
+    <script>
+        function confirmar() {
+            return confirm("¿Esta seguro de eliminar el producto?")
+        }
+    </script>
+}

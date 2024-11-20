@@ -1,0 +1,75 @@
+﻿@model IEnumerable<InventorySystem.Models.Product>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Quantity</th>
+            <th>State</th>
+            <th>Location</th>
+            <th>Image</th>
+            <th>CreationDate</th>
+            <th>LastModDate</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td> @Html.DisplayFor(m => product.ProductName)</td>
+
+                <td> @Html.DisplayFor(m => product.Category.CategoryName)</td>
+
+                <td> @Html.DisplayFor(m => product.Description)</td>
+
+                <td> @Html.DisplayFor(m => product.Quantity)</td>
+
+                <td> @Html.DisplayFor(m => product.State)</td>
+
+                <td> @Html.DisplayFor(m => product.Location.LocationName)</td>
+
+                <td>
+                    @if (!string.IsNullOrEmpty(product.ImageRoot))
+                    {
+                        <img src="@product.ImageRoot" alt="Product Image" style="width: 100px; height: auto;" />
+                    }
+                    else
+                    {
+                        <span>No image</span>
+                    }
+                </td>
+
+                <td> @Html.DisplayFor(m => product.CreationDate)</td>
+
+                <td> @Html.DisplayFor(m => product.LastModDate)</td>
+            </tr>
+
+        }
+    </tbody>
+
+</table>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#searchName").on("input", function () {
+            let searchName = $(this).val();
+
+            // Llamada AJAX al servidor
+            $.ajax({
+                url: '/Products/SearchProducts',
+                type: 'GET',
+                data: { searchName: searchName },
+                success: function (result) {
+                    // Actualizar la tabla con los resultados
+                    $("#productList").html(result);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error en la búsqueda:", error);
+                }
+            });
+        });
+    });
+</script>
