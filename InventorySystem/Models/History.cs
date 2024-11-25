@@ -21,5 +21,5 @@ public partial class History
 
     public virtual Product? IdProdNavigation { get; set; }
 
-    public virtual User? IdUserNavigation { get; set; }
+    public virtual UserLogin? IdUserNavigation { get; set; }
 }

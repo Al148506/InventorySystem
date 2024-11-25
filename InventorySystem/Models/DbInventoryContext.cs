@@ -23,11 +23,13 @@ public partial class DbInventoryContext : DbContext
 
     public virtual DbSet<Product> Products { get; set; }
 
-    public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<UserLogin> UserLogins { get; set; }
 
     public virtual DbSet<UserRol> UserRols { get; set; }
 
-    
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=AlexCG;Database=DB_Inventory; Trusted_Connection=True; TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -105,24 +107,24 @@ public partial class DbInventoryContext : DbContext
                 .HasConstraintName("FK_Product_Location");
         });
 
-        modelBuilder.Entity<User>(entity =>
+        modelBuilder.Entity<UserLogin>(entity =>
         {
-            entity.HasKey(e => e.IdUser);
+            entity.HasKey(e => e.IdUser).HasName("PK_User");
 
-            entity.ToTable("User");
+            entity.ToTable("UserLogin");
 
             entity.Property(e => e.CreationDate).HasColumnType("datetime");
-            entity.Property(e => e.Mail)
-                .HasMaxLength(100)
-                .IsUnicode(false);
-            entity.Property(e => e.Password)
+            entity.Property(e => e.UserMail)
                 .HasMaxLength(100)
                 .IsUnicode(false);
             entity.Property(e => e.UserName)
                 .HasMaxLength(100)
                 .IsUnicode(false);
+            entity.Property(e => e.UserPassword)
+                .HasMaxLength(500)
+                .IsUnicode(false);
 
-            entity.HasOne(d => d.IdRolNavigation).WithMany(p => p.Users)
+            entity.HasOne(d => d.IdRolNavigation).WithMany(p => p.UserLogins)
                 .HasForeignKey(d => d.IdRol)
                 .HasConstraintName("FK_User_UserRol");
         });

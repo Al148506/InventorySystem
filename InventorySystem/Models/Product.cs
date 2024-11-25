@@ -27,7 +27,7 @@ public partial class Product
 
     public virtual ICollection<History> Histories { get; set; } = new List<History>();
 
-    public virtual Category? Category { get; set; }
+    public virtual Category? Category{ get; set; }
 
     public virtual Location? Location { get; set; }
 }

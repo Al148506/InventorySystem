@@ -11,5 +11,5 @@ public partial class UserRol
 
     public string? Description { get; set; }
 
-    public virtual ICollection<User> Users { get; set; } = new List<User>();
+    public virtual ICollection<UserLogin> UserLogins { get; set; } = new List<UserLogin>();
 }
