@@ -1,5 +1,4 @@
-﻿
-
+﻿@model InventorySystem.Models.ViewModels.LoginViewModel
 @{
     Layout = null;
 }
@@ -25,26 +24,21 @@
                     </div>
                 </div>
                 <div class="d-flex justify-content-center form_container">
-                    <form action="@Url.Action("ValidateLogin","Login")" method="post">
+                    <form id="loginForm">
                         <div class="input-group mb-3">
                             <div class="input-group-append">
                                 <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                             </div>
                             <input type="text" name="UserMail" class="form-control input_user" value="" placeholder="Correo">
                         </div>
+                        <div id="emailError" class="text-danger d-none">Por favor, ingrese un correo válido.</div>
                         <div class="input-group mb-2">
                             <div class="input-group-append">
                                 <span class="input-group-text"><i class="fas fa-key"></i></span>
                             </div>
                             <input type="password" name="UserPassword" class="form-control input_pass" value="" placeholder="Contraseña">
                         </div>
-
-                        @if (ViewData["Mensaje"] != null)
-                        {
-                            <div class="alert alert-danger" role="alert">
-                                @ViewData["Mensaje"]
-                            </div>
-                        }
+                        <div id="passwordError" class="text-danger d-none">Por favor, ingrese su contraseña.</div>
 
                         <div class="d-flex justify-content-center mt-3 login_container">
                             <button type="submit" name="button" class="btn login_btn">Iniciar Sesion</button>
@@ -63,5 +57,6 @@
 
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="~/js/login.js"></script>
 </body>
 </html>

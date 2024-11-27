@@ -92,39 +92,41 @@ namespace InventorySystem.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> ValidateLogin(UserLogin user)
+        public async Task<IActionResult> ValidateLogin(LoginViewModel model)
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    // Si el modelo no es válido, regresar la vista con los errores
+                    return View("Index", model);
+                }
+
                 // Convertir contraseña a SHA-256
-                user.UserPassword = ConverterSha256(user.UserPassword);
+                model.UserPassword = ConverterSha256(model.UserPassword);
 
                 // Buscar usuario en la base de datos
                 UserLogin result = await _context.UserLogins
-                    .FirstOrDefaultAsync(r => r.UserMail == user.UserMail && r.UserPassword == user.UserPassword);
+                    .FirstOrDefaultAsync(r => r.UserMail == model.UserMail && r.UserPassword == model.UserPassword);
 
                 if (result == null)
                 {
                     // Usuario no encontrado
-                    ViewData["Mensaje"] = "Correo o contraseña incorrectos.";
-                    return View("Index");
+                    return Json(new { success = false, message = "Correo o contraseña incorrectos." });
                 }
 
                 // Guardar datos en la sesión
                 HttpContext.Session.SetInt32("IdUser", result.IdUser);
                 HttpContext.Session.SetString("UserMail", result.UserMail);
 
-                Console.WriteLine("IdUser guardado en sesión: " + HttpContext.Session.GetInt32("IdUser"));
-                Console.WriteLine("UserMail guardado en sesión: " + HttpContext.Session.GetString("UserMail"));
-
                 // Redirigir al inicio
-                return RedirectToAction("Index", "Home");
+                return Json(new { success = true, redirectUrl = Url.Action("Index", "Home") });
+
             }
             catch (Exception ex)
             {
                 // Manejar errores
-                ViewData["Mensaje"] = "Ocurrió un error inesperado. Inténtalo más tarde.";
-                return View("Index");
+                return Json(new { success = false, message = "Ocurrió un error inesperado. Inténtalo más tarde." });
             }
         }
 
