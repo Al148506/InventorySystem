@@ -8,6 +8,8 @@ using System.Data.SqlClient;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using InventorySystem.Models.ViewModels;
+using InventorySystem.Models.DTOs;
 
 namespace InventorySystem.Controllers
 {
@@ -32,7 +34,7 @@ namespace InventorySystem.Controllers
         }
 
         [HttpPost]
-        public IActionResult Register(UserLogin user) 
+        public IActionResult Register(UserLoginViewModel user) 
         {
    
             if (user.UserPassword == user.ConfirmPassword)
@@ -47,13 +49,14 @@ namespace InventorySystem.Controllers
             // Declarar parámetros
             var mailParam = new SqlParameter("@Mail", user.UserMail);
             var passwordParam = new SqlParameter("@Password", user.UserPassword);
+            var creationDateParam = new SqlParameter("@CreationDate", DateTime.Now);
             var registredParam = new SqlParameter("@Registred", SqlDbType.Bit) { Direction = ParameterDirection.Output };
             var messageParam = new SqlParameter("@Message", SqlDbType.VarChar, 100) { Direction = ParameterDirection.Output };
 
             // Ejecutar procedimiento
             _context.Database.ExecuteSqlRaw(
-                "EXEC sp_RegisterUser @Mail, @Password, @Registred OUTPUT, @Message OUTPUT",
-                mailParam, passwordParam, registredParam, messageParam);
+                "EXEC sp_RegisterUser @Mail, @Password,@CreationDate, @Registred OUTPUT, @Message OUTPUT",
+                mailParam, passwordParam, creationDateParam, registredParam, messageParam);
             // Leer parámetros de salida
             bool registred = (bool)registredParam.Value;
             string message = messageParam.Value.ToString();
@@ -89,24 +92,65 @@ namespace InventorySystem.Controllers
 
 
         [HttpPost]
-        public IActionResult ValidateLogin(string Mail, string Password)
+        public async Task<IActionResult> ValidateLogin(UserLogin user)
         {
-            // Verificar si existe un usuario con las credenciales proporcionadas
-            var user = _context.UserLogins
-                .FirstOrDefault(u => u.UserMail == Mail && u.UserPassword == Password);
-
-            if (user != null)
+            try
             {
-                // Usuario encontrado: redirigir al área principal
-               // TempData["UserName"] = user.UserName;  Ejemplo: pasar datos entre vistas
+                // Convertir contraseña a SHA-256
+                user.UserPassword = ConverterSha256(user.UserPassword);
+
+                // Buscar usuario en la base de datos
+                UserLogin result = await _context.UserLogins
+                    .FirstOrDefaultAsync(r => r.UserMail == user.UserMail && r.UserPassword == user.UserPassword);
+
+                if (result == null)
+                {
+                    // Usuario no encontrado
+                    ViewData["Mensaje"] = "Correo o contraseña incorrectos.";
+                    return View("Index");
+                }
+
+                // Guardar datos en la sesión
+                HttpContext.Session.SetInt32("IdUser", result.IdUser);
+                HttpContext.Session.SetString("UserMail", result.UserMail);
+
+                Console.WriteLine("IdUser guardado en sesión: " + HttpContext.Session.GetInt32("IdUser"));
+                Console.WriteLine("UserMail guardado en sesión: " + HttpContext.Session.GetString("UserMail"));
+
+                // Redirigir al inicio
                 return RedirectToAction("Index", "Home");
             }
-            else
+            catch (Exception ex)
             {
-                // Usuario no encontrado: mostrar error
-                ViewData["Mensaje"] = "Credenciales incorrectas. Inténtalo de nuevo.";
+                // Manejar errores
+                ViewData["Mensaje"] = "Ocurrió un error inesperado. Inténtalo más tarde.";
                 return View("Index");
             }
         }
-    }
+
+
+        /* // Declarar parámetros
+         var mailParam = new SqlParameter("@Mail", user.UserMail);
+         var passwordParam = new SqlParameter("@Password", user.UserPassword);
+
+         // Ejecutar procedimiento
+         var result = _context.Set<UserValidationResultDTO>()
+         .FromSqlInterpolated($"EXEC sp_UserValidation @UserMail = {mailParam}, @UserPassword = {passwordParam}")
+         .AsEnumerable()
+         .FirstOrDefault();
+         if (result != null && result.IdUser != 0) // Comprobar si el resultado no es "0"
+         {
+             // Usuario válido, redirigir a la página principal
+             HttpContext.Session.SetInt32("IdUser", result.IdUser);
+             HttpContext.Session.SetString("UserMail", user.UserMail);
+             return RedirectToAction("Index", "Home");
+         }
+         else
+         {
+             // Usuario no válido, mostrar mensaje de error
+             ViewData["Mensaje"] = "Correo o contraseña incorrectos.";
+             return View("Index");
+         }*/
+    
+}
 }

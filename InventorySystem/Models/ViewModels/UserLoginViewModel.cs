@@ -1,15 +1,12 @@
-﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
-using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace InventorySystem.Models;
-
-public partial class UserLogin
+namespace InventorySystem.Models.ViewModels;
+public class UserLoginViewModel
 {
     public int IdUser { get; set; }
-
+    [Required]
     public string? UserMail { get; set; }
-
+    [Required]
     public string? UserPassword { get; set; }
 
     public string? UserName { get; set; }
@@ -17,6 +14,7 @@ public partial class UserLogin
     public DateTime? CreationDate { get; set; }
 
     public int? IdRol { get; set; }
+    public string ConfirmPassword { get; set; }
 
     public virtual ICollection<History> Histories { get; set; } = new List<History>();
 

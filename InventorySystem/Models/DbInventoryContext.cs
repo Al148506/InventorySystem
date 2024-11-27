@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using InventorySystem.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventorySystem.Models;
 
 public partial class DbInventoryContext : DbContext
 {
-    public DbInventoryContext()
+    private readonly IConfiguration _configuration;
+    public DbInventoryContext(DbContextOptions<DbInventoryContext> options, IConfiguration configuration) : base(options)
     {
+        _configuration = configuration;
     }
 
     public DbInventoryContext(DbContextOptions<DbInventoryContext> options)
@@ -28,11 +31,14 @@ public partial class DbInventoryContext : DbContext
     public virtual DbSet<UserRol> UserRols { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=AlexCG;Database=DB_Inventory; Trusted_Connection=True; TrustServerCertificate=True");
-
+    {
+        var connectionString = _configuration.GetConnectionString("DbContext");
+        optionsBuilder.UseSqlServer(connectionString);
+    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
+        modelBuilder.Entity<UserValidationResultDTO>().HasNoKey(); // DTO sin clave primaria
         modelBuilder.Entity<Category>(entity =>
         {
             entity.HasKey(e => e.IdCategory);
