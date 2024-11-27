@@ -10,6 +10,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using InventorySystem.Models.ViewModels;
 using InventorySystem.Models.DTOs;
+using System.Text.RegularExpressions;
 
 namespace InventorySystem.Controllers
 {
@@ -34,21 +35,34 @@ namespace InventorySystem.Controllers
         }
 
         [HttpPost]
-        public IActionResult Register(UserLoginViewModel user) 
+        public IActionResult Register(RegisterViewModel user) 
         {
-   
-            if (user.UserPassword == user.ConfirmPassword)
+            // Validar si el correo está vacío
+            if (string.IsNullOrWhiteSpace(user.UserMail))
             {
-                user.UserPassword = ConverterSha256(user.UserPassword);
+                return Json(new { success = false, message = "Por favor, ingrese su correo electrónico." });
             }
-            else
+
+            // Validar formato del correo
+            if (!IsValidEmail(user.UserMail))
             {
-                ViewData["Mensaje"] = "Passwords do NOT match";
-                return View();
+                return Json(new { success = false, message = "El correo electrónico no tiene un formato válido." });
+            }
+
+            // Validar si la contraseña está vacía
+            if (string.IsNullOrWhiteSpace(user.UserPassword))
+            {
+                return Json(new { success = false, message = "Por favor, ingrese su contraseña." });
+            }
+
+            // Validar si las contraseñas coinciden
+            if (user.UserPassword != user.ConfirmPassword)
+            {
+                return Json(new { success = false, message = "Las contraseñas no coinciden." });
             }
             // Declarar parámetros
             var mailParam = new SqlParameter("@Mail", user.UserMail);
-            var passwordParam = new SqlParameter("@Password", user.UserPassword);
+            var passwordParam = new SqlParameter("@Password", ConverterSha256(user.UserPassword));
             var creationDateParam = new SqlParameter("@CreationDate", DateTime.Now);
             var registredParam = new SqlParameter("@Registred", SqlDbType.Bit) { Direction = ParameterDirection.Output };
             var messageParam = new SqlParameter("@Message", SqlDbType.VarChar, 100) { Direction = ParameterDirection.Output };
@@ -58,17 +72,17 @@ namespace InventorySystem.Controllers
                 "EXEC sp_RegisterUser @Mail, @Password,@CreationDate, @Registred OUTPUT, @Message OUTPUT",
                 mailParam, passwordParam, creationDateParam, registredParam, messageParam);
             // Leer parámetros de salida
-            bool registred = (bool)registredParam.Value;
+            bool result = (bool)registredParam.Value;
             string message = messageParam.Value.ToString();
 
-            ViewData["Mensaje"] = message;
-            if (registred)
+            if (result)
             {
-                return RedirectToAction("Index", "Login");
+
+                return Json(new { success = true, message = "Usuario registrado exitosamente.", redirectUrl = Url.Action("Index", "Login") });
             }
             else
             {
-                return View();
+                return Json(new { success = false, message = "Correo o contraseña incorrectos." });
             }
         }
 
@@ -96,12 +110,21 @@ namespace InventorySystem.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
+                // Verificar si los campos están vacíos
+                if (string.IsNullOrWhiteSpace(model.UserMail) && string.IsNullOrWhiteSpace(model.UserPassword))
                 {
-                    // Si el modelo no es válido, regresar la vista con los errores
-                    return View("Index", model);
+                    return Json(new { success = false, message = "Por favor, ingrese el correo y la contraseña." });
                 }
 
+                if (string.IsNullOrWhiteSpace(model.UserMail))
+                {
+                    return Json(new { success = false, message = "Por favor, ingrese su correo electrónico." });
+                }
+
+                if (string.IsNullOrWhiteSpace(model.UserPassword))
+                {
+                    return Json(new { success = false, message = "Por favor, ingrese su contraseña." });
+                }
                 // Convertir contraseña a SHA-256
                 model.UserPassword = ConverterSha256(model.UserPassword);
 
@@ -125,34 +148,16 @@ namespace InventorySystem.Controllers
             }
             catch (Exception ex)
             {
-                // Manejar errores
-                return Json(new { success = false, message = "Ocurrió un error inesperado. Inténtalo más tarde." });
+                // Manejar errores inesperados
+                Console.WriteLine($"Error: {ex.Message}");
+                return Json(new { success = false, message = "Ocurrió un error inesperado. Inténtalo nuevamente." });
             }
         }
-
-
-        /* // Declarar parámetros
-         var mailParam = new SqlParameter("@Mail", user.UserMail);
-         var passwordParam = new SqlParameter("@Password", user.UserPassword);
-
-         // Ejecutar procedimiento
-         var result = _context.Set<UserValidationResultDTO>()
-         .FromSqlInterpolated($"EXEC sp_UserValidation @UserMail = {mailParam}, @UserPassword = {passwordParam}")
-         .AsEnumerable()
-         .FirstOrDefault();
-         if (result != null && result.IdUser != 0) // Comprobar si el resultado no es "0"
-         {
-             // Usuario válido, redirigir a la página principal
-             HttpContext.Session.SetInt32("IdUser", result.IdUser);
-             HttpContext.Session.SetString("UserMail", user.UserMail);
-             return RedirectToAction("Index", "Home");
-         }
-         else
-         {
-             // Usuario no válido, mostrar mensaje de error
-             ViewData["Mensaje"] = "Correo o contraseña incorrectos.";
-             return View("Index");
-         }*/
-    
-}
+        // Método para validar formato de correo electrónico
+        private bool IsValidEmail(string email)
+        {
+            var emailRegex = new Regex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$");
+            return emailRegex.IsMatch(email);
+        }
+    }
 }

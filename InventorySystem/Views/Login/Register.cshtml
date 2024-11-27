@@ -1,4 +1,4 @@
-﻿
+﻿@model InventorySystem.Models.ViewModels.RegisterViewModel
 @{
     Layout = null;
 }
@@ -25,38 +25,40 @@
                     </div>
                 </div>
                 <div class="d-flex justify-content-center form_container">
-                    <form action="@Url.Action("Register","Login")" method="post">
+                    <form id="registerForm">
                         <div class="input-group mb-3">
                             <div class="input-group-append">
                                 <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                             </div>
                             <input type="text" name="UserMail" class="form-control input_user" value="" placeholder="Correo">
                         </div>
-                        <div class="input-group mb-3">
-                            <div class="input-group-append">
-                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        <div class="error-message text-danger d-none"></div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                </div>
+                                <input type="password" name="UserPassword" class="form-control input_user" value="" placeholder="Contraseña">
                             </div>
-                            <input type="password" name="UserPassword" class="form-control input_user" value="" placeholder="Contraseña">
-                        </div>
-                        <div class="input-group mb-2">
-                            <div class="input-group-append">
-                                <span class="input-group-text"><i class="fas fa-key"></i></span>
-                            </div>
-                            <input type="password" name="ConfirmPassword" class="form-control input_pass" value="" placeholder="Confirmar Contraseña">
-                        </div>
+                            <div class="error-message text-danger d-none"></div>
+                                <div class="input-group mb-2">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                    </div>
+                                    <input type="password" name="ConfirmPassword" class="form-control input_pass" value="" placeholder="Confirmar Contraseña">
+                                </div>
+                                <div class="error-message text-danger d-none"></div>
 
+                                    @*@if (ViewData["Mensaje"] != null)
+            {
+                <div class="alert alert-danger" role="alert">
+                    @ViewData["Mensaje"]
+                </div>
+            }*@
 
-                        @if (ViewData["Mensaje"] != null)
-                        {
-                            <div class="alert alert-danger" role="alert">
-                                @ViewData["Mensaje"]
-                            </div>
-                        }
-
-                        <div class="d-flex justify-content-center mt-3 login_container">
-                            <button type="submit" name="button" class="btn login_btn">Registrarse</button>
-                        </div>
-                    </form>
+                                    <div class="d-flex justify-content-center mt-3 login_container">
+                                        <button type="submit" name="button" class="btn login_btn">Registrarse</button>
+                                    </div>
+</form>
                 </div>
 
                 <div class="mt-4">
@@ -70,5 +72,6 @@
 
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="~/js/register.js"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace InventorySystem.Models.ViewModels;
-public class UserLoginViewModel
+public class RegisterViewModel
 {
     public int IdUser { get; set; }
     [Required]

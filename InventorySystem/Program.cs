@@ -1,4 +1,5 @@
 using InventorySystem.Models;
+using InventorySystem.Permissions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,10 +17,10 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true; // Necesario para cumplimiento con GDPR
 });
-builder.Services.AddControllersWithViews();/*(options =>
+builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add<ValidateSessionAttribute>();
-});*/
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
