@@ -76,10 +76,10 @@ html {
 .custom-checkbox .custom-control-input:checked ~ .custom-control-label::before {
     background-color: #c0392b !important;
 }
-#errorMessage {
+.errorMessage {
     font-family: sans-serif;
-    font-size: 14px;
-    margin: 0px;
-    padding: 10px;
-
+    font-size: 12px;
+    margin-top: -15px;
+    margin-bottom: 1px;
+    padding: 5px;
 }

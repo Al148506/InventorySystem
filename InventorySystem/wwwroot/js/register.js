@@ -1,7 +1,7 @@
 ﻿document.getElementById("registerForm").addEventListener("submit", async function (event) {
     event.preventDefault(); // Evitar el envío tradicional del formulario
     // Limpiar errores previos
-    document.querySelectorAll(".error-message").forEach((error) => {
+    document.querySelectorAll(".errorMessage").forEach((error) => {
         error.textContent = "";
         error.classList.add("d-none");
     });
@@ -55,7 +55,7 @@
                 alert(result.message); // Muestra mensaje de éxito
                 window.location.href = result.redirectUrl;
             } else {
-                const errorMessage = document.getElementById("errorMessage");
+                const errorMessage = document.querySelector(".errorMessage");
                 errorMessage.textContent = result.message;
                 errorMessage.classList.remove("d-none");
             }
@@ -72,7 +72,7 @@ function showError(field, message) {
     const errorContainer = field.closest(".input-group").nextElementSibling;
 
     // Verificar si el contenedor existe y tiene la clase de error
-    if (errorContainer && errorContainer.classList.contains("error-message")) {
+    if (errorContainer && errorContainer.classList.contains("errorMessage")) {
         errorContainer.textContent = message; // Actualizar el mensaje de error
         errorContainer.classList.remove("d-none"); // Mostrar el mensaje
     }

@@ -17,9 +17,11 @@
             if (result.success) {
                 window.location.href = result.redirectUrl;
             } else {
-                const errorMessage = document.getElementById("errorMessage");
-                errorMessage.textContent = result.message;
-                errorMessage.classList.remove("d-none");
+                const errorMessage = document.querySelector(".errorMessage");
+                if (errorMessage) {
+                    errorMessage.textContent = result.message;
+                    errorMessage.classList.remove("d-none");
+                }
             }
         } else {
             console.error("Error en la solicitud:", response.statusText);

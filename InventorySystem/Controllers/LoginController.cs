@@ -82,7 +82,7 @@ namespace InventorySystem.Controllers
             }
             else
             {
-                return Json(new { success = false, message = "Correo o contraseña incorrectos." });
+                return Json(new { success = false, message = "Este correo ya ha sido registrado" });
             }
         }
 
