@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using InventorySystem.Models.ViewModels;
 using InventorySystem.Models.DTOs;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Http;
 
 namespace InventorySystem.Controllers
 {
@@ -64,13 +65,14 @@ namespace InventorySystem.Controllers
             var mailParam = new SqlParameter("@Mail", user.UserMail);
             var passwordParam = new SqlParameter("@Password", ConverterSha256(user.UserPassword));
             var creationDateParam = new SqlParameter("@CreationDate", DateTime.Now);
+            var idRolParam = new SqlParameter("@IdRol", 3);
             var registredParam = new SqlParameter("@Registred", SqlDbType.Bit) { Direction = ParameterDirection.Output };
             var messageParam = new SqlParameter("@Message", SqlDbType.VarChar, 100) { Direction = ParameterDirection.Output };
 
             // Ejecutar procedimiento
             _context.Database.ExecuteSqlRaw(
-                "EXEC sp_RegisterUser @Mail, @Password,@CreationDate, @Registred OUTPUT, @Message OUTPUT",
-                mailParam, passwordParam, creationDateParam, registredParam, messageParam);
+                "EXEC sp_RegisterUser @Mail, @Password,@CreationDate,@IdRol, @Registred OUTPUT, @Message OUTPUT",
+                mailParam, passwordParam, creationDateParam,idRolParam, registredParam, messageParam);
             // Leer parámetros de salida
             bool result = (bool)registredParam.Value;
             string message = messageParam.Value.ToString();
@@ -141,6 +143,16 @@ namespace InventorySystem.Controllers
                 // Guardar datos en la sesión
                 HttpContext.Session.SetInt32("IdUser", result.IdUser);
                 HttpContext.Session.SetString("UserMail", result.UserMail);
+                if (result.IdRol != null)
+                {
+                    // Asignar el valor de IdRol a la sesión si no es null
+                    HttpContext.Session.SetInt32("IdRol", result.IdRol.Value); // Usa .Value porque IdRol es probablemente un int? (nullable)
+                }
+                else
+                {
+                    // Manejar el caso cuando IdRol es null
+                    return Json(new { success = false, message = "El rol del usuario no está definido. Comuníquese con el administrador." });
+                }
 
                 // Redirigir al inicio
                 return Json(new { success = true, redirectUrl = Url.Action("Index", "Home") });

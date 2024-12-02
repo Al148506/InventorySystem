@@ -24,7 +24,7 @@ namespace InventorySystem.Permissions
             if (userId == null)
             {
                 // Redirigir a la página de inicio de sesión si no hay sesión activa
-                context.Result = new RedirectToActionResult("Index", "Login", new { alert = "true" });
+                context.Result = new RedirectToActionResult("Index", "Login", null);
             }
             base.OnActionExecuting(context);
         }

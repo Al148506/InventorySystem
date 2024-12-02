@@ -1,1 +1,38 @@
-﻿Index de usuario
+﻿@model List<UserLogin>
+<h1>Users</h1>
+<p>
+    <a asp-controller="User"
+       asp-action="Create"
+       class="btn btn-success">
+        Crear
+    </a>
+</p>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>IdUser</th>
+            <th>UserMail</th>
+            <th>UserName</th>
+            <th>CreationDate</th>
+            <th>Rol</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+
+
+                <td> @Html.DisplayFor(m => user.IdUser)</td>
+
+                <td> @Html.DisplayFor(m => user.UserMail)</td>
+
+                <td> @Html.DisplayFor(m => user.UserName)</td>
+
+                <td> @Html.DisplayFor(m => user.CreationDate)</td>
+
+                <td> @Html.DisplayFor(m => user.IdRolNavigation.RolName)</td>
+            </tr>
+        }
+    </tbody>
+</table>
