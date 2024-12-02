@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace InventorySystem.CommonLib
 {
@@ -7,6 +8,10 @@ namespace InventorySystem.CommonLib
     {
         public static string ConverterSha256(string texto)
         {
+            if (string.IsNullOrEmpty(texto))
+            {
+                throw new ArgumentNullException(nameof(texto), "El texto no puede ser nulo o vacío.");
+            }
             StringBuilder Sb = new StringBuilder();
             using (SHA256 hash = SHA256.Create())
             {
@@ -18,6 +23,17 @@ namespace InventorySystem.CommonLib
             }
 
             return Sb.ToString();
+        }
+
+        // Método para validar formato de correo electrónico
+        public static bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                throw new ArgumentNullException(nameof(email), "El texto no puede ser nulo o vacío.");
+            }
+            var emailRegex = new Regex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$");
+            return emailRegex.IsMatch(email);
         }
     }
 }

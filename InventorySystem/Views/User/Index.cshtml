@@ -15,6 +15,7 @@
             <th>UserName</th>
             <th>CreationDate</th>
             <th>Rol</th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
@@ -32,7 +33,30 @@
                 <td> @Html.DisplayFor(m => user.CreationDate)</td>
 
                 <td> @Html.DisplayFor(m => user.IdRolNavigation.RolName)</td>
+
+                <td>
+                    <a asp-controller="User"
+                       asp-action="Edit"
+                       asp-route-id="@user.IdUser"
+                       class="btn btn-primary">
+                        Editar
+                    </a>
+                    <a asp-controller="User"
+                       asp-action="Delete"
+                       asp-route-id="@user.IdUser"
+                       onclick="return confirmar()"
+                       class="btn btn-danger">
+                        Eliminar
+                    </a>
+                </td>
             </tr>
         }
     </tbody>
 </table>
+@section Scripts{
+    <script>
+        function confirmar() {
+            return confirm("¿Esta seguro de eliminar el usuario?")
+        }
+    </script>
+}

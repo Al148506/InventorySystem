@@ -12,6 +12,7 @@ public class RegisterViewModel
     public string? UserName { get; set; }
 
     public DateTime? CreationDate { get; set; }
+    public DateTime? LastModDate { get; set; }
 
     public int? IdRol { get; set; }
     public string ConfirmPassword { get; set; }

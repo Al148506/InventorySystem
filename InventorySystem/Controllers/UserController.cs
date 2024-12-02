@@ -46,6 +46,7 @@ namespace InventorySystem.Controllers
             {
                 try
                 {
+                    ViewData["Rol"] = new SelectList(_context.UserRols, "IdRol", "RolName");
                     var user = new UserLogin()
                     {
                         UserName = model.UserName,
@@ -54,12 +55,22 @@ namespace InventorySystem.Controllers
                         UserPassword = commonLib.ConverterSha256(model.UserPassword),
                         IdRol = model.IdRol
                     };
-                    // Validar si las contraseñas coinciden
-                    if (model.UserPassword != model.ConfirmPassword)
+                    if (string.IsNullOrWhiteSpace(model.UserMail) || !commonLib.IsValidEmail(model.UserMail))
                     {
-                        ViewData["Mensaje"] = "Las contraseñas no coinciden." ;
+                        ViewData["Mensaje"] = "Introduzca un correo valido";
                         return View(model);
                     }
+                    if (string.IsNullOrWhiteSpace(model.UserPassword))
+                    {
+                        ViewData["Mensaje"] = "Introduzca una contraseña valida";
+                        return View(model);
+                    }
+                    if (model.UserPassword != model.ConfirmPassword)
+                    {
+                        ViewData["Mensaje"] = "Las contraseñas no coinciden.";
+                        return View(model);
+                    }
+                  
                     _context.Add(user);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
@@ -79,9 +90,70 @@ namespace InventorySystem.Controllers
                 }
                 return View(model);
             }
+        }
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var user = await _context.UserLogins.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            ViewData["Rol"] = new SelectList(_context.UserRols, "IdRol", "RolName");
+            var model = new RegisterViewModel
+            {
+                IdUser = user.IdUser,
+                UserMail = user.UserMail,
+                UserPassword = user.UserPassword,
+                UserName = user.UserName,
+                IdRol = user.IdRol,
+                CreationDate = user.CreationDate,
+                LastModDate = DateTime.Now
+            };
+            if (string.IsNullOrWhiteSpace(model.UserMail) || !commonLib.IsValidEmail(model.UserMail))
+            {
+                ViewData["Mensaje"] = "Introduzca un correo valido";
+                return View(model);
+            }
+            if (string.IsNullOrWhiteSpace(model.UserPassword))
+            {
+                ViewData["Mensaje"] = "Introduzca una contraseña valida";
+                return View(model);
+            }
+            if (model.UserPassword != model.ConfirmPassword)
+            {
+                ViewData["Mensaje"] = "Las contraseñas no coinciden.";
+                return View(model);
+            }
+           
+            return View(model);
+        }
 
+        [HttpPost]
+        public async Task<IActionResult> Edit(UserLogin user)
+        {
+            var existingUser = await _context.UserLogins.AsNoTracking().FirstOrDefaultAsync(u => u.IdUser == user.IdUser);
+            if (existingUser == null)
+            {
+                return NotFound();
+            }
+            // Mantiene el valor original de CreationDate
+            user.CreationDate = existingUser.CreationDate;
+            user.UserPassword = commonLib.ConverterSha256(user.UserPassword);
+            _context.UserLogins.Update(user);
+            await _context.SaveChangesAsync();
+            ViewData["Rol"] = new SelectList(_context.UserRols, "IdRol", "RolName");
+            return RedirectToAction(nameof(Index));
+        }
 
-
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
+        {
+            UserLogin user = await _context.UserLogins.FirstAsync
+                (p => p.IdUser == id);
+            _context.UserLogins.Remove(user);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

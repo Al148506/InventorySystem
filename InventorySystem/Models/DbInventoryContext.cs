@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using InventorySystem.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventorySystem.Models;
@@ -38,7 +37,6 @@ public partial class DbInventoryContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
 
-        modelBuilder.Entity<UserValidationResultDTO>().HasNoKey(); // DTO sin clave primaria
         modelBuilder.Entity<Category>(entity =>
         {
             entity.HasKey(e => e.IdCategory);

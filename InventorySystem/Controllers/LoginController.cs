@@ -9,9 +9,9 @@ using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using InventorySystem.Models.ViewModels;
-using InventorySystem.Models.DTOs;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
+using InventorySystem.CommonLib;
 
 namespace InventorySystem.Controllers
 {
@@ -45,7 +45,7 @@ namespace InventorySystem.Controllers
             }
 
             // Validar formato del correo
-            if (!IsValidEmail(user.UserMail))
+            if (!commonLib.IsValidEmail(user.UserMail))
             {
                 return Json(new { success = false, message = "El correo electrónico no tiene un formato válido." });
             }
@@ -63,7 +63,7 @@ namespace InventorySystem.Controllers
             }
             // Declarar parámetros
             var mailParam = new SqlParameter("@Mail", user.UserMail);
-            var passwordParam = new SqlParameter("@Password", ConverterSha256(user.UserPassword));
+            var passwordParam = new SqlParameter("@Password", commonLib.ConverterSha256(user.UserPassword));
             var creationDateParam = new SqlParameter("@CreationDate", DateTime.Now);
             var idRolParam = new SqlParameter("@IdRol", 3);
             var registredParam = new SqlParameter("@Registred", SqlDbType.Bit) { Direction = ParameterDirection.Output };
@@ -89,23 +89,6 @@ namespace InventorySystem.Controllers
         }
 
 
-        public static string ConverterSha256(string texto)
-        {
-
-            StringBuilder Sb = new StringBuilder();
-            using (SHA256 hash = SHA256.Create())
-            {
-                Encoding enc = Encoding.UTF8;
-                byte[] result = hash.ComputeHash(enc.GetBytes(texto));
-
-                foreach (byte b in result)
-                    Sb.Append(b.ToString("x2"));
-            }
-
-            return Sb.ToString();
-        }
-
-
 
         [HttpPost]
         public async Task<IActionResult> ValidateLogin(LoginViewModel model)
@@ -128,7 +111,7 @@ namespace InventorySystem.Controllers
                     return Json(new { success = false, message = "Por favor, ingrese su contraseña." });
                 }
                 // Convertir contraseña a SHA-256
-                model.UserPassword = ConverterSha256(model.UserPassword);
+                model.UserPassword = commonLib.ConverterSha256(model.UserPassword);
 
                 // Buscar usuario en la base de datos
                 UserLogin result = await _context.UserLogins
@@ -165,11 +148,6 @@ namespace InventorySystem.Controllers
                 return Json(new { success = false, message = "Ocurrió un error inesperado. Inténtalo nuevamente." });
             }
         }
-        // Método para validar formato de correo electrónico
-        private bool IsValidEmail(string email)
-        {
-            var emailRegex = new Regex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$");
-            return emailRegex.IsMatch(email);
-        }
+  
     }
 }
