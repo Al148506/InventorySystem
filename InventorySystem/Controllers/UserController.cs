@@ -18,14 +18,51 @@ namespace InventorySystem.Controllers
             _context = context;
         }
         [RoleValidation(1)]
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public async Task<IActionResult> Index(string searchName, string dateFilter, string orderFilter)
         {
-            // Obtener todos los usuarios
+            // Obtener todos los usuarios con sus relaciones necesarias
             var usersQuery = _context.UserLogins
                 .Include(p => p.IdRolNavigation)
                 .AsQueryable();
-            var users = await usersQuery.ToListAsync();
 
+            // Aplicar filtro de búsqueda por nombre
+            if (!string.IsNullOrEmpty(searchName))
+            {
+                usersQuery = usersQuery.Where(p => p.UserName.Contains(searchName));
+            }
+
+            // Aplicar ordenamiento dinámico
+            if (!string.IsNullOrEmpty(orderFilter) && !string.IsNullOrEmpty(dateFilter))
+            {
+                usersQuery = (orderFilter, dateFilter) switch
+                {
+                    ("asc", "creation") => usersQuery.OrderBy(p => p.CreationDate),
+                    ("desc", "creation") => usersQuery.OrderByDescending(p => p.CreationDate),
+                    ("asc", "modification") => usersQuery.OrderBy(p => p.LastModDate),
+                    ("desc", "modification") => usersQuery.OrderByDescending(p => p.LastModDate),
+                    _ => usersQuery // Mantener sin cambios si no coincide ningún filtro
+                };
+            }
+
+            // Preparar las listas para los SelectList conservando valores seleccionados
+            ViewBag.dateFilter = new SelectList(new[]
+            {
+        new { Text = "Creation Date", Value = "creation" },
+        new { Text = "Last Modification Date", Value = "modification" }
+    }, "Value", "Text", dateFilter); // Selección actual
+
+            ViewBag.orderFilter = new SelectList(new[]
+            {
+        new { Text = "Ascendent Order", Value = "asc" },
+        new { Text = "Descendent Order", Value = "desc" }
+    }, "Value", "Text", orderFilter); // Selección actual
+
+            // Ejecutar la consulta y pasar los datos a la vista
+            var queryDebug = usersQuery.ToQueryString(); // Esto muestra la consulta SQL generada (solo para Entity Framework Core)
+            Console.WriteLine(queryDebug);
+            var users = await usersQuery.ToListAsync();
+        
             return View(users);
         }
 

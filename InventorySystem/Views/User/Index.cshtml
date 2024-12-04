@@ -7,6 +7,38 @@
         Crear
     </a>
 </p>
+<form method="get" asp-action="Index">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="searchName">Nombre del Usuario</label>
+                <input type="text" name="searchName" class="form-control" placeholder="Buscar por nombre...">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="dateFilter">Ordenar por fecha</label>
+                <select name="dateFilter" class="form-control" asp-items="ViewBag.dateFilter">
+                    <option value="">-- Seleccione --</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="orderFilter">Tipo de orden</label>
+                <select name="orderFilter" class="form-control" asp-items="ViewBag.orderFilter">
+                    <option value="">-- Seleccione --</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn btn-primary form-control">Buscar</button>
+            </div>
+        </div>
+    </div>
+</form>
 <table class="table table-bordered">
     <thead>
         <tr>
