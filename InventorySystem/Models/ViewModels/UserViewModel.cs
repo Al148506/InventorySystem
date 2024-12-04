@@ -13,6 +13,9 @@ public class UserViewModel
     public string? UserName { get; set; }
 
     public DateTime? CreationDate { get; set; }
+    public DateTime? LastModDate { get; set; }
+
+    public string RolName { get; set; }
 
     public int? IdRol { get; set; }
 

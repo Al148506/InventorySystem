@@ -14,6 +14,7 @@
             <th>UserMail</th>
             <th>UserName</th>
             <th>CreationDate</th>
+            <th>LastModificationDate</th>
             <th>Rol</th>
             <th>Acciones</th>
         </tr>
@@ -32,7 +33,9 @@
 
                 <td> @Html.DisplayFor(m => user.CreationDate)</td>
 
-                <td> @Html.DisplayFor(m => user.IdRolNavigation.RolName)</td>
+                <td> @(user.LastModDate == null ? "Sin modificación" : Html.DisplayFor(m => user.LastModDate)) </td>
+
+                <td> @(user.IdRol == null ? "Sin modificación" : Html.DisplayFor(m => user.IdRolNavigation.RolName))</td>
 
                 <td>
                     <a asp-controller="User"

@@ -118,6 +118,7 @@ public partial class DbInventoryContext : DbContext
             entity.ToTable("UserLogin");
 
             entity.Property(e => e.CreationDate).HasColumnType("datetime");
+            entity.Property(e => e.LastModDate).HasColumnType("datetime");
             entity.Property(e => e.UserMail)
                 .HasMaxLength(100)
                 .IsUnicode(false);

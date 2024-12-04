@@ -20,7 +20,7 @@ namespace InventorySystem.Controllers
         [RoleValidation(1)]
         public async Task<IActionResult> Index()
         {
-            // Obtener todos los productos
+            // Obtener todos los usuarios
             var usersQuery = _context.UserLogins
                 .Include(p => p.IdRolNavigation)
                 .AsQueryable();
