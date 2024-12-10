@@ -5,6 +5,7 @@ using InventorySystem.CommonLib;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using InventorySystem.Data;
 
 
 namespace InventorySystem.Controllers
@@ -19,12 +20,20 @@ namespace InventorySystem.Controllers
         }
         [RoleValidation(1)]
         [HttpGet]
-        public async Task<IActionResult> Index(string searchName, string dateFilter, string orderFilter)
+        public async Task<IActionResult> Index(string searchName, string dateFilter, string orderFilter, int? numpag, string currentFilter)
         {
             // Obtener todos los usuarios con sus relaciones necesarias
             var usersQuery = _context.UserLogins
                 .Include(p => p.IdRolNavigation)
                 .AsQueryable();
+            if (searchName != null)
+            {
+                numpag = 1;
+            }
+            else
+            {
+                searchName = currentFilter;
+            }
 
             // Aplicar filtro de búsqueda por nombre
             if (!string.IsNullOrEmpty(searchName))
@@ -44,6 +53,8 @@ namespace InventorySystem.Controllers
                     _ => usersQuery // Mantener sin cambios si no coincide ningún filtro
                 };
             }
+            ViewData["CurrentOrder"] = orderFilter;
+            ViewData["CurrentFilter"] = currentFilter;
 
             // Preparar las listas para los SelectList conservando valores seleccionados
             ViewBag.dateFilter = new SelectList(new[]
@@ -58,12 +69,9 @@ namespace InventorySystem.Controllers
         new { Text = "Descendent Order", Value = "desc" }
     }, "Value", "Text", orderFilter); // Selección actual
 
-            // Ejecutar la consulta y pasar los datos a la vista
-            var queryDebug = usersQuery.ToQueryString(); // Esto muestra la consulta SQL generada (solo para Entity Framework Core)
-            Console.WriteLine(queryDebug);
-            var users = await usersQuery.ToListAsync();
-        
-            return View(users);
+            //var users = await usersQuery.ToListAsync();
+            int regQuantity = 6;
+            return View(await Pagination<UserLogin>.CreatePagination(usersQuery.AsNoTracking(), numpag ?? 1, regQuantity));
         }
 
         [HttpGet]
