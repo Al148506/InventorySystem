@@ -26,6 +26,7 @@ namespace InventorySystem.Controllers
             var usersQuery = _context.UserLogins
                 .Include(p => p.IdRolNavigation)
                 .AsQueryable();
+            //Paginacion
             if (!string.IsNullOrEmpty(searchName))
             {
                 numpag = 1;
@@ -34,7 +35,7 @@ namespace InventorySystem.Controllers
             {
                 searchName = currentFilter;
             }
-            ViewData["CurrentFilter"] = searchName; // Asegúrate de actualizar el filtro en ViewData
+            ViewData["CurrentFilter"] = searchName; 
            
 
             // Aplicar filtro de búsqueda por nombre

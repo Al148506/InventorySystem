@@ -1,4 +1,4 @@
-﻿@model List<Product>
+﻿@model InventorySystem.Data.Pagination<Product>
 <h1>Productos</h1>
 <p>
     <a asp-controller="Product"
@@ -12,13 +12,13 @@
         <div class="col-md-4">
             <div class="form-group">
                 <label for="searchName">Nombre del Producto</label>
-                <input type="text" name="searchName" class="form-control" placeholder="Buscar por nombre...">
+                <input type="text" name="searchName" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Buscar por nombre...">
             </div>
         </div>
         <div class="col-md-3">
             <div class="form-group">
                 <label for="categoryId">Categoría</label>
-                <select name="categoryId" class="form-control" asp-items="ViewBag.Category">
+                <select name="categoryId" class="form-control" asp-items="ViewBag.Category" asp-route-currentFilter="@ViewData["CurrentFilter"]">
                     <option value="">-- Seleccione --</option>
                 </select>
             </div>
@@ -26,7 +26,7 @@
         <div class="col-md-3">
             <div class="form-group">
                 <label for="locationId">Ubicación</label>
-                <select name="locationId" class="form-control" asp-items="ViewBag.Location">
+                <select name="locationId" class="form-control" asp-items="ViewBag.Location" asp-route-currentFilter="@ViewData["CurrentFilter"]">
                     <option value="">-- Seleccione --</option>
                 </select>
             </div>
@@ -104,6 +104,42 @@
         }
     </tbody>
 </table>
+
+@{
+    var previousDisabled = !Model.PreviousPages ? "disabled" : "";
+    var nextDisabled = !Model.LaterPages ? "disabled" : "";
+}
+<div>
+    <!-- Botón Anterior -->
+    <a asp-action="Index"
+       asp-route-categoryId="@ViewData["CurrentCategory"]"
+       asp-route-locationId="@ViewData["CurrentLocation"]"
+       asp-route-numpag="@(Model.InitialPage - 1)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       class="btn btn-primary @previousDisabled">Anterior</a>
+
+    <!-- Paginación -->
+    @for (var i = 1; i <= Model.TotalPages; i++)
+    {
+        var activepage = (i == Model.InitialPage) ? "active" : "";
+        <a asp-action="Index"
+            asp-route-categoryId="@ViewData["CurrentCategory"]"
+            asp-route-locationId="@ViewData["CurrentLocation"]"
+           asp-route-numpag="@i"
+           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+           class="btn btn-primary @activepage">@i</a>
+    }
+
+    <!-- Botón Siguiente -->
+    <a asp-action="Index"
+       asp-route-categoryId="@ViewData["CurrentCategory"]"
+       asp-route-locationId="@ViewData["CurrentLocation"]"
+       asp-route-numpag="@(Model.InitialPage + 1)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       class="btn btn-primary @nextDisabled">Siguiente</a>
+</div>
+
+
 @section Scripts{
     <script>
         function confirmar() {

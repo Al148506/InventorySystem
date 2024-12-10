@@ -1,4 +1,5 @@
-﻿using InventorySystem.Models;
+﻿using InventorySystem.Data;
+using InventorySystem.Models;
 using InventorySystem.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -16,14 +17,23 @@ namespace InventorySystem.Controllers
         {
             _context = context;
         }
-        public async Task<IActionResult> Index(string searchName, int? categoryId, int? locationId)
+        public async Task<IActionResult> Index(string searchName, int? categoryId, int? locationId, int? numpag, string currentFilter, string currentCategory, string currentLocation)
         {
             // Obtener todos los productos
             var productsQuery = _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Location)
                 .AsQueryable();
-
+            //Paginacion
+            if (!string.IsNullOrEmpty(searchName))
+            {
+                numpag = 1;
+            }
+            else
+            {
+                searchName = currentFilter;
+            }
+            ViewData["CurrentFilter"] = searchName;
             // Filtrar por nombre
             if (!string.IsNullOrEmpty(searchName))
             {
@@ -41,13 +51,18 @@ namespace InventorySystem.Controllers
             {
                 productsQuery = productsQuery.Where(p => p.IdLocation == locationId.Value);
             }
-            // Pasar datos a la vista
-            ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName");
-            ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName");
-           
-            var products = await productsQuery.ToListAsync();
+            //Mantiene los filtros durante paginacion
+            ViewData["CurrentCategory"] = categoryId;
+            ViewData["CurrentLocation"] = locationId;
 
-            return View(await productsQuery.ToListAsync());
+            // Pasar datos a la vista
+            ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName",categoryId);
+            ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName",locationId);
+
+            //var products = await productsQuery.ToListAsync();
+            int regQuantity = 3;
+            return View(await Pagination<Product>.CreatePagination(productsQuery.AsNoTracking(), numpag ?? 1, regQuantity));
+      
         }
        
         [HttpGet]
