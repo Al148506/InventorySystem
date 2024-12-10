@@ -95,15 +95,16 @@
         }
     </tbody>
 </table>
-@{
+@{ 
     var previousDisabled = !Model.PreviousPages ? "disabled" : "";
     var nextDisabled = !Model.LaterPages ? "disabled" : "";
 }
 <div>
     <!-- Botón Anterior -->
-    <a asp-action="Index"
-       asp-route-currentOrder="@ViewData["CurrentOrder"]"
-       asp-route-numpag="@(Model.InitialPage - 1)"
+    <a asp-action="Index" 
+       asp-route-orderFilter="@ViewData["CurrentOrder"]"
+       asp-route-dateFilter="@ViewData["CurrentDateFilter"]"
+       asp-route-numpag="@(Model.InitialPage - 1)" 
        asp-route-currentFilter="@ViewData["CurrentFilter"]"
        class="btn btn-primary @previousDisabled">Anterior</a>
 
@@ -111,17 +112,19 @@
     @for (var i = 1; i <= Model.TotalPages; i++)
     {
         var activepage = (i == Model.InitialPage) ? "active" : "";
-        <a asp-action="Index"
-           asp-route-currentOrder="@ViewData["CurrentOrder"]"
-           asp-route-numpag="@i"
+        <a asp-action="Index" 
+           asp-route-orderFilter="@ViewData["CurrentOrder"]"
+           asp-route-dateFilter="@ViewData["CurrentDateFilter"]"
+           asp-route-numpag="@i" 
            asp-route-currentFilter="@ViewData["CurrentFilter"]"
            class="btn btn-primary @activepage">@i</a>
     }
 
     <!-- Botón Siguiente -->
-    <a asp-action="Index"
-       asp-route-currentOrder="@ViewData["CurrentOrder"]"
-       asp-route-numpag="@(Model.InitialPage + 1)"
+    <a asp-action="Index" 
+       asp-route-orderFilter="@ViewData["CurrentOrder"]"
+       asp-route-dateFilter="@ViewData["CurrentDateFilter"]"
+       asp-route-numpag="@(Model.InitialPage + 1)" 
        asp-route-currentFilter="@ViewData["CurrentFilter"]"
        class="btn btn-primary @nextDisabled">Siguiente</a>
 </div>

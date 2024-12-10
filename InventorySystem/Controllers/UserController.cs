@@ -20,13 +20,13 @@ namespace InventorySystem.Controllers
         }
         [RoleValidation(1)]
         [HttpGet]
-        public async Task<IActionResult> Index(string searchName, string dateFilter, string orderFilter, int? numpag, string currentFilter)
+        public async Task<IActionResult> Index(string searchName, string dateFilter, string orderFilter, int? numpag, string currentFilter,string currentOrder)
         {
             // Obtener todos los usuarios con sus relaciones necesarias
             var usersQuery = _context.UserLogins
                 .Include(p => p.IdRolNavigation)
                 .AsQueryable();
-            if (searchName != null)
+            if (!string.IsNullOrEmpty(searchName))
             {
                 numpag = 1;
             }
@@ -34,6 +34,8 @@ namespace InventorySystem.Controllers
             {
                 searchName = currentFilter;
             }
+            ViewData["CurrentFilter"] = searchName; // Asegúrate de actualizar el filtro en ViewData
+           
 
             // Aplicar filtro de búsqueda por nombre
             if (!string.IsNullOrEmpty(searchName))
@@ -54,8 +56,7 @@ namespace InventorySystem.Controllers
                 };
             }
             ViewData["CurrentOrder"] = orderFilter;
-            ViewData["CurrentFilter"] = currentFilter;
-
+            ViewData["CurrentDateFilter"] = dateFilter;
             // Preparar las listas para los SelectList conservando valores seleccionados
             ViewBag.dateFilter = new SelectList(new[]
             {

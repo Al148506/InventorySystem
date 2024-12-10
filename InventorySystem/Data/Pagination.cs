@@ -20,7 +20,7 @@ namespace InventorySystem.Data
         public static async Task<Pagination<T>> CreatePagination(IQueryable<T> source, int initialPage, int regQuantity)
         {
             var counter = await source.CountAsync();
-            var items = await source.Skip(initialPage - 1).Take(regQuantity).ToListAsync();
+            var items = await source.Skip((initialPage - 1) * regQuantity).Take(regQuantity).ToListAsync();
             return new Pagination<T>(items, counter, initialPage, regQuantity);
         }
     }
