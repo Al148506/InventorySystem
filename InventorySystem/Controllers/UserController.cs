@@ -10,6 +10,7 @@ using InventorySystem.Data;
 
 namespace InventorySystem.Controllers
 {
+    [RoleValidation(1)]
     public class UserController : Controller
     {
         private readonly DbInventoryContext _context;
@@ -18,7 +19,6 @@ namespace InventorySystem.Controllers
         {
             _context = context;
         }
-        [RoleValidation(1)]
         [HttpGet]
         public async Task<IActionResult> Index(string searchName, string dateFilter, string orderFilter, int? numpag, string currentFilter,string currentOrder)
         {
@@ -79,7 +79,7 @@ namespace InventorySystem.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            ViewData["Rol"] = new SelectList(_context.UserRols, "IdRol", "RolName");
+            ViewData["Rol"] = new SelectList(_context.UserRols, "IdRol", "RolName",3);
 
             return View();
         }
@@ -93,7 +93,6 @@ namespace InventorySystem.Controllers
             {
                 try
                 {
-                    ViewData["Rol"] = new SelectList(_context.UserRols, "IdRol", "RolName");
                     var user = new UserLogin()
                     {
                         UserName = model.UserName,
@@ -135,6 +134,7 @@ namespace InventorySystem.Controllers
                 {
                     Console.WriteLine($"Error: {error.ErrorMessage}");
                 }
+                ViewData["Rol"] = new SelectList(_context.UserRols, "IdRol", "RolName",3);
                 return View(model);
             }
         }

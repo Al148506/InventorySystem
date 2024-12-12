@@ -16,7 +16,7 @@ public partial class DbInventoryContext : DbContext
         : base(options)
     {
     }
-
+    public DbSet<ChangeLog> ChangeLogs { get; set; }
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<History> Histories { get; set; }

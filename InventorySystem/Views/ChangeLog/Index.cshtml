@@ -1,0 +1,33 @@
+﻿@model InventorySystem.Data.Pagination<ChangeLog>
+<h1>Audit Logs List</h1>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>UserId</th>
+            <th>TypeAction</th>
+            <th>TableName</th>
+            <th>DateMod</th>
+            <th>OldValues</th>
+            <th>NewValues</th>
+            <th>AffectedColumns</th>
+            <th>PrimaryKey</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var log in Model)
+        {
+            <tr>
+                <td> @Html.DisplayFor(m => log.Id)</td>
+                <td> @Html.DisplayFor(m => log.UserId)</td>
+                <td> @Html.DisplayFor(m => log.TypeAction)</td>
+                <td> @Html.DisplayFor(m => log.TableName)</td>
+                <td> @Html.DisplayFor(m => log.DateMod)</td>
+                <td> @Html.DisplayFor(m => log.OldValues)</td>
+                <td> @Html.DisplayFor(m => log.NewValues)</td>
+                <td> @Html.DisplayFor(m => log.AffectedColumns)</td>
+                <td> @Html.DisplayFor(m => log.PrimaryKey)</td>
+            </tr>
+        }
+    </tbody>
+</table>
