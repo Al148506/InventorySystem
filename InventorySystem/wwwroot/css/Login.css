@@ -79,7 +79,7 @@ html {
 .errorMessage {
     font-family: sans-serif;
     font-size: 12px;
-    margin-top: -15px;
+/*    margin-top: -15px;*/
     margin-bottom: 1px;
     padding: 5px;
 }

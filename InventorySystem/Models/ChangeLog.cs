@@ -36,4 +36,4 @@ namespace InventorySystem.Models
         public string PrimaryKey { get; set; }
     }
 }
-}
+

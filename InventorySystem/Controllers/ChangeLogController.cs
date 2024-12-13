@@ -1,4 +1,5 @@
-﻿using InventorySystem.Models;
+﻿using InventorySystem.Data;
+using InventorySystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,13 +12,14 @@ namespace InventorySystem.Controllers
         {
             _context = context;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index(int? numpag)
         {
-            var history = _context.ChangeLogs
+            var logsQuery = _context.ChangeLogs
            .OrderByDescending(log => log.DateMod)
-           .ToList();
+           .AsQueryable();
 
-            return View(history);
+            int regQuantity = 5;
+            return View(await Pagination<ChangeLog>.CreatePagination(logsQuery.AsNoTracking(), numpag ?? 1, regQuantity));
         }
     }
 }

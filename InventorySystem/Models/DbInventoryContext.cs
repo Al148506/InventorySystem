@@ -148,6 +148,48 @@ public partial class DbInventoryContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<ChangeLog>(entity =>
+        {
+            // Define el nombre de la tabla
+            entity.ToTable("ChangeLog");
+
+            // Configuración de la clave primaria
+            entity.HasKey(e => e.Id);
+
+            // Configuración de las propiedades
+            entity.Property(e => e.Id)
+                  .IsRequired()
+                  .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.UserId)
+                  .IsRequired()
+                  .HasMaxLength(255);
+
+            entity.Property(e => e.TypeAction)
+                  .IsRequired()
+                  .HasMaxLength(255);
+
+            entity.Property(e => e.TableName)
+                  .IsRequired()
+                  .HasMaxLength(255);
+
+            entity.Property(e => e.DateMod)
+                  .IsRequired()
+                  .HasDefaultValueSql("GETDATE()");
+
+            entity.Property(e => e.OldValues)
+                  .HasMaxLength(255);
+
+            entity.Property(e => e.NewValues)
+                  .HasMaxLength(255);
+
+            entity.Property(e => e.AffectedColumns)
+                  .HasMaxLength(255);
+
+            entity.Property(e => e.PrimaryKey)
+                  .HasMaxLength(255);
+        });
+
         OnModelCreatingPartial(modelBuilder);
     }
 
