@@ -20,7 +20,7 @@ namespace InventorySystem.Controllers
             _context = context;
         }
         [HttpGet]
-        public async Task<IActionResult> Index(string searchName, string dateFilter, string orderFilter, int? numpag, string currentFilter,string currentOrder)
+        public async Task<IActionResult> Index(string searchName, string dateFilter, string orderFilter, int? numpag, string currentFilter, string currentOrder)
         {
             // Obtener todos los usuarios con sus relaciones necesarias
             var usersQuery = _context.UserLogins
@@ -35,8 +35,8 @@ namespace InventorySystem.Controllers
             {
                 searchName = currentFilter;
             }
-            ViewData["CurrentFilter"] = searchName; 
-           
+            ViewData["CurrentFilter"] = searchName;
+
 
             // Aplicar filtro de búsqueda por nombre
             if (!string.IsNullOrEmpty(searchName))
@@ -79,7 +79,7 @@ namespace InventorySystem.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            ViewData["Rol"] = new SelectList(_context.UserRols, "IdRol", "RolName",3);
+            ViewData["Rol"] = new SelectList(_context.UserRols, "IdRol", "RolName", 3);
 
             return View();
         }
@@ -116,7 +116,7 @@ namespace InventorySystem.Controllers
                         ViewData["Mensaje"] = "Las contraseñas no coinciden.";
                         return View(model);
                     }
-                  
+
                     _context.Add(user);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
@@ -134,7 +134,7 @@ namespace InventorySystem.Controllers
                 {
                     Console.WriteLine($"Error: {error.ErrorMessage}");
                 }
-                ViewData["Rol"] = new SelectList(_context.UserRols, "IdRol", "RolName",3);
+                ViewData["Rol"] = new SelectList(_context.UserRols, "IdRol", "RolName", 3);
                 return View(model);
             }
         }
@@ -162,17 +162,7 @@ namespace InventorySystem.Controllers
                 ViewData["Mensaje"] = "Introduzca un correo valido";
                 return View(model);
             }
-            if (string.IsNullOrWhiteSpace(model.UserPassword))
-            {
-                ViewData["Mensaje"] = "Introduzca una contraseña valida";
-                return View(model);
-            }
-            if (model.UserPassword != model.ConfirmPassword)
-            {
-                ViewData["Mensaje"] = "Las contraseñas no coinciden.";
-                return View(model);
-            }
-           
+
             return View(model);
         }
 
@@ -186,9 +176,18 @@ namespace InventorySystem.Controllers
             }
             // Mantiene el valor original de CreationDate
             user.CreationDate = existingUser.CreationDate;
-            user.UserPassword = commonLib.ConverterSha256(user.UserPassword);
-            _context.UserLogins.Update(user);
-            await _context.SaveChangesAsync();
+            user.UserPassword = existingUser.UserPassword;
+            //user.UserPassword = commonLib.ConverterSha256(user.UserPassword);
+            try
+            {
+                _context.UserLogins.Update(user);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Registra el error y devuelve un mensaje al usuario
+                ModelState.AddModelError("", "No se pudo actualizar el usuario.");
+            }
             ViewData["Rol"] = new SelectList(_context.UserRols, "IdRol", "RolName");
             return RedirectToAction(nameof(Index));
         }
@@ -201,6 +200,58 @@ namespace InventorySystem.Controllers
             _context.UserLogins.Remove(user);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ChangePassword(int id)
+        {
+            var user = await _context.UserLogins.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var model = new ChangePasswordViewModel
+            {
+                IdUser = user.IdUser
+            };
+            return View(model);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var user = await _context.UserLogins.FindAsync(model.IdUser);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var confirmPasswordHash = commonLib.ConverterSha256(model.ConfirmPassword);
+            user.UserPassword = commonLib.ConverterSha256(model.NewPassword);
+            user.LastModDate = DateTime.Now;
+            if (user.UserPassword != confirmPasswordHash)
+            {
+                ModelState.AddModelError("", "Passwords do not match.");
+                return View(model);
+            }
+          
+            try
+            {
+                _context.UserLogins.Update(user);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "La contraseña se ha cambiado correctamente.";
+                return RedirectToAction("Index", "User");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "No se pudo actualizar la contraseña.");
+                return View(model);
+
+            }
         }
     }
 }

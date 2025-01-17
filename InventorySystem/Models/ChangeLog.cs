@@ -23,17 +23,17 @@ namespace InventorySystem.Models
         [Required]
         public DateTime DateMod { get; set; } = DateTime.Now;
 
-        [StringLength(255)]
-        public string OldValues { get; set; }
+        [StringLength(5000)]
+        public string? OldValues { get; set; }
+
+        [StringLength(5000)]
+        public string? NewValues { get; set; }
 
         [StringLength(255)]
-        public string NewValues { get; set; }
+        public string? AffectedColumns { get; set; }
 
         [StringLength(255)]
-        public string AffectedColumns { get; set; }
-
-        [StringLength(255)]
-        public string PrimaryKey { get; set; }
+        public string? PrimaryKey { get; set; }
     }
 }
 

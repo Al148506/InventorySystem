@@ -16,18 +16,18 @@ public class RegisterViewModel
     [Required]
     [Range(1, 3, ErrorMessage = "Por favor, selecciona un rol válido.")]
     public int? IdRol { get; set; }
-    public string ConfirmPassword { get; set; }
+    public string? ConfirmPassword { get; set; }
 
-    public static ValidationResult ValidatePassword(RegisterViewModel register)
-    {
-        ValidationResult result = null;
+    //public static ValidationResult ValidatePassword(RegisterViewModel register)
+    //{
+    //    ValidationResult result = null;
 
-        if (register.UserPassword != register.ConfirmPassword)
-        {
-            result = new ValidationResult("The passwords do not match.");
-        }
-        return result;
-    }
+    //    if (register.UserPassword != register.ConfirmPassword)
+    //    {
+    //        result = new ValidationResult("The passwords do not match.");
+    //    }
+    //    return result;
+    //}
     public virtual ICollection<History> Histories { get; set; } = new List<History>();
 
     public virtual UserRol? IdRolNavigation { get; set; }

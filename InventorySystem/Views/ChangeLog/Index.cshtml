@@ -1,57 +1,64 @@
 ﻿@model InventorySystem.Data.Pagination<ChangeLog>
+<head>
+    <link href="~/css/ChangeLog.css" rel="stylesheet" />
+</head>
 <h1>Audit Logs List</h1>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>UserId</th>
-            <th>TypeAction</th>
-            <th>TableName</th>
-            <th>DateMod</th>
-            <th>OldValues</th>
-            <th>NewValues</th>
-            <th>AffectedColumns</th>
-            <th>PrimaryKey</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var log in Model)
-        {
-            <tr>
-                <td> @Html.DisplayFor(m => log.Id)</td>
-                <td> @Html.DisplayFor(m => log.UserId)</td>
-                <td> @Html.DisplayFor(m => log.TypeAction)</td>
-                <td> @Html.DisplayFor(m => log.TableName)</td>
-                <td> @Html.DisplayFor(m => log.DateMod)</td>
-                <td> @Html.DisplayFor(m => log.OldValues)</td>
-                <td> @Html.DisplayFor(m => log.NewValues)</td>
-                <td> @Html.DisplayFor(m => log.AffectedColumns)</td>
-                <td> @Html.DisplayFor(m => log.PrimaryKey)</td>
-            </tr>
-        }
-    </tbody>
-</table>
-@{
-    var previousDisabled = !Model.PreviousPages ? "disabled" : "";
-    var nextDisabled = !Model.LaterPages ? "disabled" : "";
-}
-<div>
+
+<div class="d-flex justify-content-end">
+    <div class="table-container">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>UserId</th>
+                    <th>TypeAction</th>
+                    <th>TableName</th>
+                    <th>DateMod</th>
+                    <th>OldValues</th>
+                    <th>NewValues</th>
+                    <th>AffectedColumns</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var log in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(m => log.Id)</td>
+                        <td>@Html.DisplayFor(m => log.UserId)</td>
+                        <td>@Html.DisplayFor(m => log.TypeAction)</td>
+                        <td>@Html.DisplayFor(m => log.TableName)</td>
+                        <td>@Html.DisplayFor(m => log.DateMod)</td>
+                        <td>@Html.DisplayFor(m => log.OldValues)</td>
+                        <td>@Html.DisplayFor(m => log.NewValues)</td>
+                        <td>@Html.DisplayFor(m => log.AffectedColumns)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+
+<div class="d-flex justify-content-center my-3">
     <!-- Botón Anterior -->
     <a asp-action="Index"
        asp-route-numpag="@(Model.InitialPage - 1)"
-       class="btn btn-primary @previousDisabled">Anterior</a>
+       class="btn btn-primary @(!Model.PreviousPages ? "disabled" : "")">Anterior</a>
 
     <!-- Paginación -->
     @for (var i = 1; i <= Model.TotalPages; i++)
     {
-        var activepage = (i == Model.InitialPage) ? "active" : "";
+        var activePage = (i == Model.InitialPage) ? "active" : "";
         <a asp-action="Index"
            asp-route-numpag="@i"
-           class="btn btn-primary @activepage">@i</a>
+           class="btn btn-outline-primary mx-1 @activePage">@i</a>
     }
 
     <!-- Botón Siguiente -->
     <a asp-action="Index"
        asp-route-numpag="@(Model.InitialPage + 1)"
-       class="btn btn-primary @nextDisabled">Siguiente</a>
+       class="btn btn-primary @(!Model.LaterPages ? "disabled" : "")">Siguiente</a>
 </div>

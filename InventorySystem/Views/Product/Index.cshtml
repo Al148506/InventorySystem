@@ -1,21 +1,19 @@
 ﻿@model InventorySystem.Data.Pagination<Product>
 <h1>Productos</h1>
 <p>
-    <a asp-controller="Product"
-       asp-action="Create"
-       class="btn btn-success">
-        Crear
-    </a>
 </p>
 <form method="get" asp-action="Index">
-    <div class="row">
-        <div class="col-md-4">
+    <div class="d-flex align-items-end flex-wrap mb-2">
+        <!-- Campo de búsqueda por nombre -->
+        <div class="me-2">
             <div class="form-group">
                 <label for="searchName">Nombre del Producto</label>
                 <input type="text" name="searchName" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Buscar por nombre...">
             </div>
         </div>
-        <div class="col-md-3">
+
+        <!-- Categoría -->
+        <div class="me-2">
             <div class="form-group">
                 <label for="categoryId">Categoría</label>
                 <select name="categoryId" class="form-control" asp-items="ViewBag.Category" asp-route-currentFilter="@ViewData["CurrentFilter"]">
@@ -23,7 +21,9 @@
                 </select>
             </div>
         </div>
-        <div class="col-md-3">
+
+        <!-- Ubicación -->
+        <div class="me-2">
             <div class="form-group">
                 <label for="locationId">Ubicación</label>
                 <select name="locationId" class="form-control" asp-items="ViewBag.Location" asp-route-currentFilter="@ViewData["CurrentFilter"]">
@@ -31,119 +31,122 @@
                 </select>
             </div>
         </div>
-        <div class="col-md-2">
-            <div class="form-group">
-                <label>&nbsp;</label>
-                <button type="submit" class="btn btn-primary form-control">Buscar</button>
-            </div>
+
+        <!-- Botón Buscar -->
+        <div class="me-2">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+
+        <div class="me-2">
+            <a asp-action="Index" class="btn btn-primary form-control">Complete List</a>
+        </div>
+        <!-- Botón Nuevo Producto -->
+        <div class="ms-auto">
+            <a asp-controller="Product" asp-action="Create" class="btn btn-success">Nuevo Producto</a>
         </div>
     </div>
 </form>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Description</th>
-            <th>Quantity</th>
-            <th>State</th>
-            <th>Location</th>
-            <th>Image</th>
-            <th>CreationDate</th>
-            <th>LastModDate</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var product in Model)
-        {
+<div class="table-responsive">
+    <table class="table table-bordered table-hover border-dark">
+        <thead class="table-dark">
             <tr>
-                <td> @Html.DisplayFor(m => product.ProductName)</td>
-
-                <td> @Html.DisplayFor(m => product.Category.CategoryName)</td>
-
-                <td> @Html.DisplayFor(m => product.Description)</td>
-
-                <td> @Html.DisplayFor(m => product.Quantity)</td>
-
-                <td> @Html.DisplayFor(m => product.State)</td>
-
-                <td> @Html.DisplayFor(m => product.Location.LocationName)</td>
-
-                <td>
-                    @if (!string.IsNullOrEmpty(product.ImageRoot))
-                    {
-                        <img src="@product.ImageRoot" alt="Product Image" style="width: 100px; height: auto;" />
-                    }
-                    else
-                    {
-                        <span>No image</span>
-                    }
-                </td>
-
-                <td> @Html.DisplayFor(m => product.CreationDate)</td>
-
-                <td> @Html.DisplayFor(m => product.LastModDate)</td>
-                <td>
-                    <a asp-controller="Product"
-                       asp-action="Edit"
-                       asp-route-id="@product.IdProd"
-                       class="btn btn-primary">
-                        Editar
-                    </a>
-                    <a asp-controller="Product"
-                       asp-action="Delete"
-                       asp-route-id="@product.IdProd"
-                       onclick="return confirmar()"
-                       class="btn btn-danger">
-                        Eliminar
-                    </a>
-                </td>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>State</th>
+                <th>Location</th>
+                <th>Image</th>
+                <th>CreationDate</th>
+                <th>LastModDate</th>
+                <th>Acciones</th>
             </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td> @Html.DisplayFor(m => product.ProductName)</td>
 
-        }
-    </tbody>
-</table>
+                    <td> @Html.DisplayFor(m => product.Category.CategoryName)</td>
 
-@{
-    var previousDisabled = !Model.PreviousPages ? "disabled" : "";
-    var nextDisabled = !Model.LaterPages ? "disabled" : "";
-}
-<div>
-    <!-- Botón Anterior -->
-    <a asp-action="Index"
-       asp-route-categoryId="@ViewData["CurrentCategory"]"
-       asp-route-locationId="@ViewData["CurrentLocation"]"
-       asp-route-numpag="@(Model.InitialPage - 1)"
-       asp-route-currentFilter="@ViewData["CurrentFilter"]"
-       class="btn btn-primary @previousDisabled">Anterior</a>
+                    <td> @Html.DisplayFor(m => product.Description)</td>
 
-    <!-- Paginación -->
-    @for (var i = 1; i <= Model.TotalPages; i++)
-    {
-        var activepage = (i == Model.InitialPage) ? "active" : "";
-        <a asp-action="Index"
-            asp-route-categoryId="@ViewData["CurrentCategory"]"
-            asp-route-locationId="@ViewData["CurrentLocation"]"
-           asp-route-numpag="@i"
-           asp-route-currentFilter="@ViewData["CurrentFilter"]"
-           class="btn btn-primary @activepage">@i</a>
-    }
+                    <td> @Html.DisplayFor(m => product.Quantity)</td>
 
-    <!-- Botón Siguiente -->
-    <a asp-action="Index"
-       asp-route-categoryId="@ViewData["CurrentCategory"]"
-       asp-route-locationId="@ViewData["CurrentLocation"]"
-       asp-route-numpag="@(Model.InitialPage + 1)"
-       asp-route-currentFilter="@ViewData["CurrentFilter"]"
-       class="btn btn-primary @nextDisabled">Siguiente</a>
+                    <td> @Html.DisplayFor(m => product.State)</td>
+
+                    <td> @Html.DisplayFor(m => product.Location.LocationName)</td>
+
+                    <td>
+                        @if (!string.IsNullOrEmpty(product.ImageRoot))
+                        {
+                            <img src="@product.ImageRoot" alt="Product Image" style="width: 100px; height: auto;" />
+                        }
+                        else
+                        {
+                            <span>No image</span>
+                        }
+                    </td>
+
+                    <td> @Html.DisplayFor(m => product.CreationDate)</td>
+
+                    <td> @Html.DisplayFor(m => product.LastModDate)</td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.IdProd" class="btn btn-primary">
+                                Editar
+                            </a>
+                            <a asp-controller="Product" asp-action="Delete" asp-route-id="@product.IdProd" onclick="return confirmar()" class="btn btn-danger">
+                                Eliminar
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+
+            }
+        </tbody>
+    </table>
 </div>
+    @{
+        var previousDisabled = !Model.PreviousPages ? "disabled" : "";
+        var nextDisabled = !Model.LaterPages ? "disabled" : "";
+    }
+    <div>
+        <!-- Botón Anterior -->
+        <a asp-action="Index"
+           asp-route-categoryId="@ViewData["CurrentCategory"]"
+           asp-route-locationId="@ViewData["CurrentLocation"]"
+           asp-route-numpag="@(Model.InitialPage - 1)"
+           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+           class="btn btn-primary @previousDisabled">Anterior</a>
 
-
-@section Scripts{
-    <script>
-        function confirmar() {
-            return confirm("¿Esta seguro de eliminar el producto?")
+        <!-- Paginación -->
+        @for (var i = 1; i <= Model.TotalPages; i++)
+        {
+            var activepage = (i == Model.InitialPage) ? "active" : "";
+            <a asp-action="Index"
+               asp-route-categoryId="@ViewData["CurrentCategory"]"
+               asp-route-locationId="@ViewData["CurrentLocation"]"
+               asp-route-numpag="@i"
+               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+               class="btn btn-primary @activepage">@i</a>
         }
-    </script>
-}
+
+        <!-- Botón Siguiente -->
+        <a asp-action="Index"
+           asp-route-categoryId="@ViewData["CurrentCategory"]"
+           asp-route-locationId="@ViewData["CurrentLocation"]"
+           asp-route-numpag="@(Model.InitialPage + 1)"
+           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+           class="btn btn-primary @nextDisabled">Siguiente</a>
+    </div>
+
+
+    @section Scripts{
+        <script>
+            function confirmar() {
+                return confirm("¿Esta seguro de eliminar el producto?")
+            }
+        </script>
+    }

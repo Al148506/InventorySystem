@@ -1,15 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace InventorySystem.Models;
 
 public partial class DbInventoryContext : DbContext
 {
     private readonly IConfiguration _configuration;
-    public DbInventoryContext(DbContextOptions<DbInventoryContext> options, IConfiguration configuration) : base(options)
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    public DbInventoryContext(DbContextOptions<DbInventoryContext> options, IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : base(options)
     {
         _configuration = configuration;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public DbInventoryContext(DbContextOptions<DbInventoryContext> options)
@@ -28,6 +33,142 @@ public partial class DbInventoryContext : DbContext
     public virtual DbSet<UserLogin> UserLogins { get; set; }
 
     public virtual DbSet<UserRol> UserRols { get; set; }
+
+    private void AddAuditEntries()
+    {
+        var entries = ChangeTracker.Entries()
+            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted);
+        // Lista temporal para las entradas de auditoría
+        var auditEntries = new List<ChangeLog>();
+
+        foreach (var entry in entries)
+        {
+            var auditEntry = new ChangeLog
+            {
+                TableName = entry.Entity.GetType().Name,
+                DateMod = DateTime.Now,
+                UserId = GetCurrentUserId(), // Implementar un método para obtener el usuario actual
+                PrimaryKey = GetPrimaryKeyValue(entry) // Obtener el valor de la clave primaria
+            };
+
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    auditEntry.TypeAction = "Creación";
+                    auditEntry.NewValues = SerializeProperties(GetAddedProperties(entry));
+                    break;
+
+                case EntityState.Modified:
+                    auditEntry.TypeAction = "Actualización";
+                    auditEntry.OldValues = SerializeProperties(GetOriginalValues(entry));
+                    auditEntry.NewValues = SerializeProperties(GetCurrentValues(entry));
+                    auditEntry.AffectedColumns = GetModifiedColumns(entry);
+                    break;
+
+                case EntityState.Deleted:
+                    auditEntry.TypeAction = "Eliminación";
+                    auditEntry.OldValues = SerializeProperties(GetDeletedProperties(entry));
+                    break;
+            }
+
+            // Agregar el registro a la tabla de auditoría
+            auditEntries.Add(auditEntry);
+        }
+        // Agregar las entradas de auditoría al contexto después de iterar
+        ChangeLogs.AddRange(auditEntries);
+    }
+
+    // Obtener Propiedades Agregadas
+    private Dictionary<string, object> GetAddedProperties(EntityEntry entry)
+    {
+        return entry.Properties
+            .Where(p => p.CurrentValue != null)
+            .ToDictionary(p => p.Metadata.Name, p => p.CurrentValue);
+    }
+
+    // Obtener Valores Originales
+    private Dictionary<string, object> GetOriginalValues(EntityEntry entry)
+    {
+        return entry.Properties
+             .Where(p => p.OriginalValue != null)
+            .ToDictionary(p => p.Metadata.Name, p => p.OriginalValue);
+    }
+
+    // Obtener Valores Actuales
+    private Dictionary<string, object> GetCurrentValues(EntityEntry entry)
+    {
+        return entry.Properties
+            .Where(p => p.IsModified)
+            .ToDictionary(p => p.Metadata.Name, p => p.CurrentValue);
+    }
+
+    // Obtener Propiedades Eliminadas
+    private Dictionary<string, object> GetDeletedProperties(EntityEntry entry)
+    {
+        return entry.Properties
+            .Where(p => p.OriginalValue != null)
+            .ToDictionary(p => p.Metadata.Name, p => p.OriginalValue);
+    }
+
+    // Obtener Columnas Modificadas
+    private string GetModifiedColumns(EntityEntry entry)
+    {
+        var modifiedColumns = entry.Properties
+            .Where(p => p.IsModified)
+            .Select(p => p.Metadata.Name);
+
+        return string.Join(", ", modifiedColumns);
+    }
+
+    // Obtener Valor de la Clave Primaria
+    private string GetPrimaryKeyValue(EntityEntry entry)
+    {
+        var primaryKey = entry.Metadata.FindPrimaryKey();
+
+        if (primaryKey == null)
+            return "Sin clave primaria";
+
+        var keyValues = primaryKey.Properties
+            .Select(p => entry.Property(p.Name).CurrentValue?.ToString());
+
+        return string.Join(", ", keyValues);
+    }
+
+    // Serializar Propiedades
+    private string SerializeProperties(object properties)
+    {
+        var json= JsonSerializer.Serialize(properties, new JsonSerializerOptions { WriteIndented = true });
+        const int maxLength = 5000;
+        if (json.Length > maxLength)
+        {
+            json = json.Substring(0, maxLength - 3) + "...";
+        }
+        return json;
+    }
+
+    // Obtener el Usuario Actual
+    private string GetCurrentUserId()
+    {
+        // Intenta obtener el valor del correo electrónico del usuario desde la sesión
+        var userMail = _httpContextAccessor.HttpContext?.Session.GetString("UserMail");
+
+        // Si no se encuentra el valor, devuelve un mensaje predeterminado
+        return !string.IsNullOrEmpty(userMail) ? userMail : "Usuario desconocido";
+    }
+
+    public override int SaveChanges()
+    {
+        AddAuditEntries();
+        return base.SaveChanges();
+    }
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        AddAuditEntries();
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
+
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -178,10 +319,10 @@ public partial class DbInventoryContext : DbContext
                   .HasDefaultValueSql("GETDATE()");
 
             entity.Property(e => e.OldValues)
-                  .HasMaxLength(255);
+                  .HasMaxLength(5000);
 
             entity.Property(e => e.NewValues)
-                  .HasMaxLength(255);
+                  .HasMaxLength(5000);
 
             entity.Property(e => e.AffectedColumns)
                   .HasMaxLength(255);

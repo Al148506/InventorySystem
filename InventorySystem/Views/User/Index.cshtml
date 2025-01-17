@@ -1,21 +1,16 @@
 ﻿@model InventorySystem.Data.Pagination<UserLogin>
 <h1>Users</h1>
 <p>
-    <a asp-controller="User"
-       asp-action="Create"
-       class="btn btn-success">
-        Crear
-    </a>
 </p>
 <form method="get" asp-action="Index">
-    <div class="row align-items-end gx-2">
-        <div class="col-auto">
+    <div class="d-flex align-items-end flex-wrap mb-2">
+        <div class="me-2">
             <div class="form-group">
                 <label for="searchName">Nombre del Usuario</label>
                 <input type="text" name="searchName" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Buscar por nombre...">
             </div>
         </div>
-        <div class="col-auto">
+        <div class="me-2">
             <div class="form-group">
                 <label for="dateFilter">Ordenar por fecha</label>
                 <select name="dateFilter" class="form-control" asp-items="ViewBag.dateFilter" asp-route-currentFilter="@ViewData["CurrentFilter"]">
@@ -23,7 +18,7 @@
                 </select>
             </div>
         </div>
-        <div class="col-auto">
+        <div class="me-2">
             <div class="form-group">
                 <label for="orderFilter">Tipo de orden</label>
                 <select name="orderFilter" class="form-control" asp-items="ViewBag.orderFilter" asp-route-currentFilter="@ViewData["CurrentFilter"]">
@@ -31,80 +26,94 @@
                 </select>
             </div>
         </div>
-        <div class="col-auto">
+
+        <!-- Botones -->
+        <div class="me-2">
             <div class="form-group">
                 <label>&nbsp;</label>
-                <button type="submit" class="btn btn-primary form-control">Buscar</button>
+                <button type="submit" class="btn btn-primary form-control">Search</button>
             </div>
         </div>
-        <div class="col-auto">
+        <div class="me-2">
             <div class="form-group">
                 <label>&nbsp;</label>
-                <button asp-action="Index" class="btn btn-primary">Complete List</button>
+                <a asp-action="Index" class="btn btn-primary form-control">Complete List</a>
+            </div>
+        </div>
+        <div class="ms-auto">
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <a asp-controller="User" asp-action="Create" class="btn btn-success form-control">
+                    Create User
+                </a>
             </div>
         </div>
     </div>
 </form>
-<br />
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>IdUser</th>
-            <th>UserMail</th>
-            <th>UserName</th>
-            <th>CreationDate</th>
-            <th>LastModificationDate</th>
-            <th>Rol</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover border-dark">
+        <thead class="table-dark">
             <tr>
-
-
-                <td> @Html.DisplayFor(m => user.IdUser)</td>
-
-                <td> @Html.DisplayFor(m => user.UserMail)</td>
-
-                <td> @Html.DisplayFor(m => user.UserName)</td>
-
-                <td> @Html.DisplayFor(m => user.CreationDate)</td>
-
-                <td> @(user.LastModDate == null ? "Sin modificación" : Html.DisplayFor(m => user.LastModDate)) </td>
-
-                <td> @(user.IdRol == null ? "Sin modificación" : Html.DisplayFor(m => user.IdRolNavigation.RolName))</td>
-
-                <td>
-                    <a asp-controller="User"
-                       asp-action="Edit"
-                       asp-route-id="@user.IdUser"
-                       class="btn btn-primary">
-                        Editar
-                    </a>
-                    <a asp-controller="User"
-                       asp-action="Delete"
-                       asp-route-id="@user.IdUser"
-                       onclick="return confirmar()"
-                       class="btn btn-danger">
-                        Eliminar
-                    </a>
-                </td>
+                <th>IdUser</th>
+                <th>UserMail</th>
+                <th>UserName</th>
+                <th>CreationDate</th>
+                <th>LastModificationDate</th>
+                <th>Rol</th>
+                <th>Acciones</th>
             </tr>
-        }
-    </tbody>
-</table>
-@{ 
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+
+
+                    <td> @Html.DisplayFor(m => user.IdUser)</td>
+
+                    <td> @Html.DisplayFor(m => user.UserMail)</td>
+
+                    <td> @Html.DisplayFor(m => user.UserName)</td>
+
+                    <td> @Html.DisplayFor(m => user.CreationDate)</td>
+
+                    <td> @(user.LastModDate == null ? "Sin modificación" : Html.DisplayFor(m => user.LastModDate)) </td>
+
+                    <td> @(user.IdRol == null ? "Sin modificación" : Html.DisplayFor(m => user.IdRolNavigation.RolName))</td>
+
+                    <td>
+                        <div class="d-flex gap-2">
+                            <a asp-controller="User"
+                               asp-action="Edit"
+                               asp-route-id="@user.IdUser"
+                               class="btn btn-primary">
+                                Editar
+                            </a>
+                            <a asp-controller="User"
+                               asp-action="Delete"
+                               asp-route-id="@user.IdUser"
+                               onclick="return confirmar()"
+                               class="btn btn-danger">
+                                Eliminar
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+@{
     var previousDisabled = !Model.PreviousPages ? "disabled" : "";
     var nextDisabled = !Model.LaterPages ? "disabled" : "";
 }
 <div>
     <!-- Botón Anterior -->
-    <a asp-action="Index" 
+    <a asp-action="Index"
        asp-route-orderFilter="@ViewData["CurrentOrder"]"
        asp-route-dateFilter="@ViewData["CurrentDateFilter"]"
-       asp-route-numpag="@(Model.InitialPage - 1)" 
+       asp-route-numpag="@(Model.InitialPage - 1)"
        asp-route-currentFilter="@ViewData["CurrentFilter"]"
        class="btn btn-primary @previousDisabled">Anterior</a>
 
@@ -112,19 +121,19 @@
     @for (var i = 1; i <= Model.TotalPages; i++)
     {
         var activepage = (i == Model.InitialPage) ? "active" : "";
-        <a asp-action="Index" 
+        <a asp-action="Index"
            asp-route-orderFilter="@ViewData["CurrentOrder"]"
            asp-route-dateFilter="@ViewData["CurrentDateFilter"]"
-           asp-route-numpag="@i" 
+           asp-route-numpag="@i"
            asp-route-currentFilter="@ViewData["CurrentFilter"]"
            class="btn btn-primary @activepage">@i</a>
     }
 
     <!-- Botón Siguiente -->
-    <a asp-action="Index" 
+    <a asp-action="Index"
        asp-route-orderFilter="@ViewData["CurrentOrder"]"
        asp-route-dateFilter="@ViewData["CurrentDateFilter"]"
-       asp-route-numpag="@(Model.InitialPage + 1)" 
+       asp-route-numpag="@(Model.InitialPage + 1)"
        asp-route-currentFilter="@ViewData["CurrentFilter"]"
        class="btn btn-primary @nextDisabled">Siguiente</a>
 </div>
