@@ -1,5 +1,6 @@
 ## Inventory System
-A modern system for managing inventories, designed for small and medium-sized businesses. This application enables you to efficiently manage products, users, audit logs, and generate PDF reports. Developed using asp.net, with the code languages ​​c# and javascript for the backend, razor pages, css and bootstrap for the frontend and a database in sql server for storage
+A modern system for managing inventories, designed for small and medium-sized businesses. This application enables you to efficiently manage products, users, audit logs, and generate PDF reports. 
+
 ### Features
 
 - Inventory Management: Record, view, and update your inventory information quickly and easily.
