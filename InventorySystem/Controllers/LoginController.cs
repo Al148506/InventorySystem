@@ -18,9 +18,11 @@ namespace InventorySystem.Controllers
     public class LoginController : Controller
     {
         private readonly DbInventoryContext _context;
-        public LoginController(DbInventoryContext context)
+        private readonly IConfiguration _configuration;
+        public LoginController(DbInventoryContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
         public IActionResult Index()
         {
@@ -88,66 +90,72 @@ namespace InventorySystem.Controllers
             }
         }
 
-
-
         [HttpPost]
         public async Task<IActionResult> ValidateLogin(LoginViewModel model)
         {
             try
             {
-                // Verificar si los campos están vacíos
-                if (string.IsNullOrWhiteSpace(model.UserMail) && string.IsNullOrWhiteSpace(model.UserPassword))
+                // Verificar si el reCAPTCHA fue resuelto
+                var captchaResponse = Request.Form["g-recaptcha-response"];
+                if (string.IsNullOrEmpty(captchaResponse) || !await ValidateCaptcha(captchaResponse))
                 {
-                    return Json(new { success = false, message = "Por favor, ingrese el correo y la contraseña." });
+                    return Json(new { success = false, message = "Por favor, resuelva el reCAPTCHA para continuar." });
                 }
 
-                if (string.IsNullOrWhiteSpace(model.UserMail))
+                // Lógica existente para validar credenciales
+                if (string.IsNullOrWhiteSpace(model.UserMail) || string.IsNullOrWhiteSpace(model.UserPassword))
                 {
-                    return Json(new { success = false, message = "Por favor, ingrese su correo electrónico." });
+                    return Json(new { success = false, message = "Por favor, ingrese su correo y contraseña." });
                 }
 
-                if (string.IsNullOrWhiteSpace(model.UserPassword))
-                {
-                    return Json(new { success = false, message = "Por favor, ingrese su contraseña." });
-                }
-                // Convertir contraseña a SHA-256
                 model.UserPassword = commonLib.ConverterSha256(model.UserPassword);
-
-                // Buscar usuario en la base de datos
                 UserLogin result = await _context.UserLogins
                     .FirstOrDefaultAsync(r => r.UserMail == model.UserMail && r.UserPassword == model.UserPassword);
 
                 if (result == null)
                 {
-                    // Usuario no encontrado
                     return Json(new { success = false, message = "Correo o contraseña incorrectos." });
                 }
 
-                // Guardar datos en la sesión
+                // Guardar sesión y redirigir
                 HttpContext.Session.SetInt32("IdUser", result.IdUser);
                 HttpContext.Session.SetString("UserMail", result.UserMail);
-                if (result.IdRol != null)
-                {
-                    // Asignar el valor de IdRol a la sesión si no es null
-                    HttpContext.Session.SetInt32("IdRol", result.IdRol.Value); // Usa .Value porque IdRol es probablemente un int? (nullable)
-                }
-                else
-                {
-                    // Manejar el caso cuando IdRol es null
-                    return Json(new { success = false, message = "El rol del usuario no está definido. Comuníquese con el administrador." });
-                }
+                HttpContext.Session.SetInt32("IdRol", result.IdRol ?? 0);
 
-                // Redirigir al inicio
                 return Json(new { success = true, redirectUrl = Url.Action("Index", "Home") });
-
             }
             catch (Exception ex)
             {
-                // Manejar errores inesperados
                 Console.WriteLine($"Error: {ex.Message}");
-                return Json(new { success = false, message = "Ocurrió un error inesperado. Inténtalo nuevamente." });
+                return Json(new { success = false, message = "Ocurrió un error inesperado. Inténtelo de nuevo." });
             }
         }
-  
+
+        private async Task<bool> ValidateCaptcha(string captchaResponse)
+        {
+            var secretKey = _configuration.GetValue<string>("GoogleReCaptcha:SecretKey");
+            using (var client = new HttpClient())
+            {
+                var response = await client.PostAsync(
+                    $"https://www.google.com/recaptcha/api/siteverify?secret={secretKey}&response={captchaResponse}",
+                    null);
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+
+                var captchaResult = System.Text.Json.JsonSerializer.Deserialize<CaptchaResult>(jsonResponse);
+
+                return captchaResult != null && captchaResult.success;
+            }
+        }
+
+
+        // Clase para mapear la respuesta del reCAPTCHA
+        private class CaptchaResult
+        {
+            public bool success { get; set; }
+            public string challenge_ts { get; set; } // Marca de tiempo del desafío
+            public string hostname { get; set; } // Nombre del host del cliente
+        }
+
+
     }
 }

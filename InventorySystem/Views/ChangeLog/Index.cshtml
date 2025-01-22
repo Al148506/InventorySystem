@@ -3,26 +3,88 @@
     <link href="~/css/ChangeLog.css" rel="stylesheet" />
 </head>
 <h1>Audit Logs List</h1>
+<form method="get" asp-action="Index">
+    <!-- Serach by UserMail -->
+    <div class="d-flex align-items-end flex-wrap mb-2">
+        <div class="me-2">
+            <div class="form-group">
+                <label for="searchName">User Mail</label>
+                <input type="text" name="searchName" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Search by Mail...">
+            </div>
+        </div>
+        <!-- Order by date -->
+        <div class="me-2">
+            <div class="form-group">
+                <label for="orderFilter">Sort by Date</label>
+                <select name="orderFilter" class="form-control" asp-items="ViewBag.orderFilter">
+                    <option value="">-- Select --</option>
+                </select>
+            </div>
+        </div>
+        <!-- Search by Action type -->
+        <div class="me-2">
+            <div class="form-group">
+                <label for="actionType">Action Type</label>
+                <select name="actionType" class="form-control" asp-items="ViewBag.typeAction">
+                    <option value="">-- Select --</option>
+                    @if (ViewData["currentActionType"] != null)
+                    {
+                        <option selected value="@ViewData["currentActionType"]">@ViewData["currentActionType"]</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="me-2">
+            <button type="submit" class="btn btn-primary form-control">Search</button>
+        </div>
+        <div class="me-2">
+            <a asp-action="Index" class="btn btn-secondary form-control">Clear</a>
+        </div>
+        <div class="me-2">
+            <a asp-action="GeneratePdf" class="btn btn-success">Export All to PDF</a>
+        </div>
+
+    </div>
+</form>
+
 
 <div class="d-flex justify-content-end">
     <div class="table-container">
-        <table class="table-custom">
+        <table class="table-custom" id="logTable">
+            <colgroup>
+                <col style="width: 5%;"> 
+                <col style="width: 15%;">
+                <col style="width: 12%;"> 
+                <col style="width: 10%;"> 
+                <col style="width: 10%;"> 
+                <col style="width: 28%;"> 
+                <col style="width: 28%;"> 
+                @*<col style="width: 10%;">*@ 
+               
+            </colgroup>
             <thead>
                 <tr>
                     <th>Id</th>
-                    <th>UserId</th>
-                    <th>TypeAction</th>
+                    <th>UserMail</th>
+                    <th>ActionType</th>
                     <th>TableName</th>
                     <th>DateMod</th>
                     <th>OldValues</th>
                     <th>NewValues</th>
-                    <th>AffectedColumns</th>
+                    @*<th>AffectedColumns</th>*@
                 </tr>
             </thead>
             <tbody>
                 @foreach (var log in Model)
                 {
-                    <tr>
+                    <tr data-id="@log.Id"
+                        data-usermail="@log.UserId"
+                        data-typeaction="@log.TypeAction"
+                        data-tablename="@log.TableName"
+                        data-datemod="@log.DateMod"
+                        data-oldvalues="@log.OldValues"
+                        data-newvalues="@log.NewValues"
+                        data-affectedcolumns="@log.AffectedColumns">
                         <td>@Html.DisplayFor(m => log.Id)</td>
                         <td>@Html.DisplayFor(m => log.UserId)</td>
                         <td>@Html.DisplayFor(m => log.TypeAction)</td>
@@ -30,11 +92,39 @@
                         <td>@Html.DisplayFor(m => log.DateMod)</td>
                         <td>@Html.DisplayFor(m => log.OldValues)</td>
                         <td>@Html.DisplayFor(m => log.NewValues)</td>
-                        <td>@Html.DisplayFor(m => log.AffectedColumns)</td>
+                        @*<td>@Html.DisplayFor(m => log.AffectedColumns)</td>*@
                     </tr>
                 }
             </tbody>
+
         </table>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="logModal" tabindex="-1" aria-labelledby="logModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <!-- Cambia a modal-lg o modal-xl para agrandar -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logModalLabel">Log Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+                <!-- Contenido largo -->
+                <p><strong>Id:</strong> <span id="modalId"></span></p>
+                <p><strong>UserMail:</strong> <span id="modalUserMail"></span></p>
+                <p><strong>TypeAction:</strong> <span id="modalTypeAction"></span></p>
+                <p><strong>TableName:</strong> <span id="modalTableName"></span></p>
+                <p><strong>DateMod:</strong> <span id="modalDateMod"></span></p>
+                <p><strong>OldValues:</strong> <span id="modalOldValues"></span></p>
+                <p><strong>NewValues:</strong> <span id="modalNewValues"></span></p>
+                <p><strong>AffectedColumns:</strong> <span id="modalAffectedColumns"></span></p>
+                <!-- Más contenido -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -46,7 +136,11 @@
     <!-- Botón Anterior -->
     <a asp-action="Index"
        asp-route-numpag="@(Model.InitialPage - 1)"
-       class="btn btn-primary @(!Model.PreviousPages ? "disabled" : "")">Anterior</a>
+       asp-route-searchName="@ViewData["CurrentFilter"]"
+       asp-route-orderFilter="@ViewData["CurrentOrder"]"
+       asp-route-actionType="@ViewData["currentActionType"]"
+
+       class="btn btn-primary @(!Model.PreviousPages ? "disabled" : "")">Back</a>
 
     <!-- Paginación -->
     @for (var i = 1; i <= Model.TotalPages; i++)
@@ -54,11 +148,48 @@
         var activePage = (i == Model.InitialPage) ? "active" : "";
         <a asp-action="Index"
            asp-route-numpag="@i"
+           asp-route-searchName="@ViewData["CurrentFilter"]"
+           asp-route-orderFilter="@ViewData["CurrentOrder"]"
+           asp-route-actionType="@ViewData["currentActionType"]"
            class="btn btn-outline-primary mx-1 @activePage">@i</a>
     }
 
     <!-- Botón Siguiente -->
     <a asp-action="Index"
        asp-route-numpag="@(Model.InitialPage + 1)"
-       class="btn btn-primary @(!Model.LaterPages ? "disabled" : "")">Siguiente</a>
+       asp-route-searchName="@ViewData["CurrentFilter"]"
+       asp-route-orderFilter="@ViewData["CurrentOrder"]"
+       asp-route-actionType="@ViewData["currentActionType"]"
+       class="btn btn-primary @(!Model.LaterPages ? "disabled" : "")">Next</a>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const tableRows = document.querySelectorAll("#logTable tbody tr");
+
+        tableRows.forEach(row => {
+            row.addEventListener("click", function () {
+                const id = this.getAttribute("data-id");
+                const userMail = this.getAttribute("data-usermail");
+                const typeAction = this.getAttribute("data-typeaction");
+                const tableName = this.getAttribute("data-tablename");
+                const dateMod = this.getAttribute("data-datemod");
+                const oldValues = this.getAttribute("data-oldvalues");
+                const newValues = this.getAttribute("data-newvalues");
+                const affectedColumns = this.getAttribute("data-affectedcolumns");
+
+                document.getElementById("modalId").textContent = id;
+                document.getElementById("modalUserMail").textContent = userMail;
+                document.getElementById("modalTypeAction").textContent = typeAction;
+                document.getElementById("modalTableName").textContent = tableName;
+                document.getElementById("modalDateMod").textContent = dateMod;
+                document.getElementById("modalOldValues").textContent = oldValues;
+                document.getElementById("modalNewValues").textContent = newValues;
+                document.getElementById("modalAffectedColumns").textContent = affectedColumns;
+
+                const modal = new bootstrap.Modal(document.getElementById("logModal"));
+                modal.show();
+            });
+        });
+    });
+</script>

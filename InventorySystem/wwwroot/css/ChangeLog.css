@@ -10,7 +10,7 @@
     border-collapse: collapse;
     table-layout: fixed;
 }
-
+ 
     /* Encabezado de la tabla */
     .table-custom th {
         background-color: #212529;

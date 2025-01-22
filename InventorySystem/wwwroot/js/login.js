@@ -14,12 +14,17 @@
             if (contentType && contentType.includes("application/json")) {
                 const result = await response.json();
                 if (result.success) {
+                    // Redirigir si el inicio de sesión es exitoso
                     window.location.href = result.redirectUrl;
                 } else {
+                    // Mostrar mensaje de error
                     const errorMessage = document.querySelector(".errorMessage");
                     if (errorMessage) {
                         errorMessage.textContent = result.message;
                         errorMessage.classList.remove("d-none");
+                    }
+                    if (typeof grecaptcha !== "undefined") {
+                        grecaptcha.reset();
                     }
                 }
             } else {
@@ -32,3 +37,4 @@
         console.error("Error de red:", error);
     }
 });
+

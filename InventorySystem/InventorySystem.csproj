@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DinkToPdf" Version="1.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>
@@ -21,6 +22,7 @@
   <ItemGroup>
     <None Include="wwwroot\Images\iphone16.png" />
     <None Include="wwwroot\Images\laptop.png" />
+    <None Include="wwwroot\lib\libwkhtmltox.dll" />
   </ItemGroup>
 
 </Project>

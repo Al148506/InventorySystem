@@ -1,10 +1,16 @@
 using InventorySystem.Models;
 using InventorySystem.Permissions;
 using Microsoft.EntityFrameworkCore;
+using DinkToPdf;
+using DinkToPdf.Contracts;
+using InventorySystem.CommonLib;
 
 var builder = WebApplication.CreateBuilder(args);
-
+// Configuración de libwkhtmltox
+var context = new CustomAssemblyLoadContext();
+context.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\lib\\", "libwkhtmltox.dll"));
 // Add services to the container.
+builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<DbInventoryContext>(options =>

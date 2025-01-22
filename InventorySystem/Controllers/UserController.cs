@@ -6,6 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using InventorySystem.Data;
+using DinkToPdf;
+using System.Text;
+using DinkToPdf.Contracts;
+using System;
 
 
 namespace InventorySystem.Controllers
@@ -14,10 +18,11 @@ namespace InventorySystem.Controllers
     public class UserController : Controller
     {
         private readonly DbInventoryContext _context;
-
-        public UserController(DbInventoryContext context)
+        private readonly IConverter _converter;
+        public UserController(DbInventoryContext context, IConverter converter)
         {
             _context = context;
+            _converter = converter;
         }
         [HttpGet]
         public async Task<IActionResult> Index(string searchName, string dateFilter, string orderFilter, int? numpag, string currentFilter, string currentOrder)
@@ -253,5 +258,109 @@ namespace InventorySystem.Controllers
 
             }
         }
+
+        public IActionResult GeneratePdf()
+        {
+            // Obtener todos los datos de la tabla ChangeLog
+            var users = _context.UserLogins
+                .Include(u => u.IdRolNavigation)
+                .AsNoTracking()
+                .ToList();
+
+
+            // Construir el contenido HTML para el PDF usando StringBuilder para mejorar el rendimiento
+            var htmlContent = new StringBuilder();
+            htmlContent.Append(@"
+        <html>
+        <head>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                }
+                h1 {
+                    text-align: center;
+                    font-size: 24px;
+                    margin-bottom: 20px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    table-layout: fixed;
+                }
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: left;
+                    word-wrap: break-word; /* Evita desbordamientos en las celdas */
+                }
+                th {
+                    background-color: #f2f2f2;
+                    font-weight: bold;
+                }
+                tr {
+                    page-break-inside: avoid; /* Evita que una fila se corte entre páginas */
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Users Report</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>UserName</th>
+                        <th>UserMail</th>
+                        <th>Rol</th>
+                        <th>CreationDate</th>
+                        <th>LastModDate</th>
+                    </tr>
+                </thead>
+                <tbody>");
+
+            foreach (var user in users)
+            {
+                htmlContent.Append("<tr>")
+                           .AppendFormat("<td>{0}</td>", user.IdUser)
+                           .AppendFormat("<td>{0}</td>", user.UserName)
+                           .AppendFormat("<td>{0}</td>", user.UserMail)
+                           .AppendFormat("<td>{0}</td>", user?.IdRolNavigation?.RolName ?? "N/A")
+                           .AppendFormat("<td>{0:yyyy-MM-dd HH:mm:ss}</td>", user.CreationDate)
+                           .AppendFormat("<td>{0}</td>", user.LastModDate?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Whithout modifications")
+                           .Append("</tr>");
+            }
+
+            htmlContent.Append(@"
+                </tbody>
+            </table>
+        </body>
+        </html>");
+
+            // Configurar el documento PDF
+            var pdfDoc = new HtmlToPdfDocument
+            {
+                GlobalSettings = new GlobalSettings
+                {
+                    ColorMode = ColorMode.Color,
+                    Orientation = Orientation.Landscape,
+                    PaperSize = PaperKind.A4,
+                    Margins = new MarginSettings { Top = 10, Bottom = 10, Left = 10, Right = 10 },
+                }
+            };
+
+            pdfDoc.Objects.Add(new ObjectSettings
+            {
+                HtmlContent = htmlContent.ToString(),
+                WebSettings = { DefaultEncoding = "utf-8" }
+            });
+
+            // Convertir a PDF
+            var pdf = _converter.Convert(pdfDoc);
+
+            // Retornar el PDF como archivo descargable
+            return File(pdf, "application/pdf", "ChangeLog.pdf");
+        }
+
     }
 }

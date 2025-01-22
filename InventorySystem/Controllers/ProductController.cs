@@ -1,4 +1,6 @@
-﻿using InventorySystem.Data;
+﻿using DinkToPdf;
+using DinkToPdf.Contracts;
+using InventorySystem.Data;
 using InventorySystem.Models;
 using InventorySystem.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
+using System.Text;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace InventorySystem.Controllers
@@ -13,9 +16,11 @@ namespace InventorySystem.Controllers
     public class ProductController : Controller
     {
         private readonly DbInventoryContext _context;
-        public ProductController(DbInventoryContext context)
+        private readonly IConverter _converter;
+        public ProductController(DbInventoryContext context, IConverter converter)
         {
             _context = context;
+            _converter = converter;
         }
         public async Task<IActionResult> Index(string searchName, int? categoryId, int? locationId, int? numpag, string currentFilter, string currentCategory, string currentLocation)
         {
@@ -60,7 +65,7 @@ namespace InventorySystem.Controllers
             ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName",locationId);
 
             //var products = await productsQuery.ToListAsync();
-            int regQuantity = 3;
+            int regQuantity = 6;
             return View(await Pagination<Product>.CreatePagination(productsQuery.AsNoTracking(), numpag ?? 1, regQuantity));
       
         }
@@ -219,6 +224,113 @@ namespace InventorySystem.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        public IActionResult GeneratePdf()
+        {
+            // Obtener todos los datos de la tabla ChangeLog
+            var products = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Location)
+                .AsNoTracking()
+                .ToList();
+
+
+            // Construir el contenido HTML para el PDF usando StringBuilder para mejorar el rendimiento
+            var htmlContent = new StringBuilder();
+            htmlContent.Append(@"
+        <html>
+        <head>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                }
+                h1 {
+                    text-align: center;
+                    font-size: 24px;
+                    margin-bottom: 20px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    table-layout: fixed;
+                }
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: left;
+                    word-wrap: break-word; /* Evita desbordamientos en las celdas */
+                }
+                th {
+                    background-color: #f2f2f2;
+                    font-weight: bold;
+                }
+                tr {
+                    page-break-inside: avoid; /* Evita que una fila se corte entre páginas */
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Products Report</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ProductName</th>
+                        <th>Quantity</th>
+                        <th>CategoryName</th>
+                        <th>LocationName</th>
+                        <th>State</th>
+                        <th>Description</th>
+                        <th>CreationDate</th>
+                        <th>LastModDate</th>
+                    </tr>
+                </thead>
+                <tbody>");
+
+            foreach (var product in products)
+            {
+                htmlContent.Append("<tr>")
+                           .AppendFormat("<td>{0}</td>", product.ProductName)
+                           .AppendFormat("<td>{0}</td>", product.Quantity)
+                            .AppendFormat("<td>{0}</td>", product.Category.CategoryName)
+                           .AppendFormat("<td>{0}</td>", product.Location.LocationName)
+                           .AppendFormat("<td>{0}</td>", product.State)
+                           .AppendFormat("<td>{0}</td>", product.Description)
+                           .AppendFormat("<td>{0:yyyy-MM-dd HH:mm:ss}</td>", product.CreationDate)
+                           .AppendFormat("<td>{0}</td>", product.LastModDate?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Whithout modifications")
+                           .Append("</tr>");
+            }
+
+            htmlContent.Append(@"
+                </tbody>
+            </table>
+        </body>
+        </html>");
+
+            // Configurar el documento PDF
+            var pdfDoc = new HtmlToPdfDocument
+            {
+                GlobalSettings = new GlobalSettings
+                {
+                    ColorMode = ColorMode.Color,
+                    Orientation = Orientation.Landscape,
+                    PaperSize = PaperKind.A4,
+                    Margins = new MarginSettings { Top = 10, Bottom = 10, Left = 10, Right = 10 },
+                }
+            };
+
+            pdfDoc.Objects.Add(new ObjectSettings
+            {
+                HtmlContent = htmlContent.ToString(),
+                WebSettings = { DefaultEncoding = "utf-8" }
+            });
+
+            // Convertir a PDF
+            var pdf = _converter.Convert(pdfDoc);
+
+            // Retornar el PDF como archivo descargable
+            return File(pdf, "application/pdf", "ChangeLog.pdf");
+        }
 
     }
 }
