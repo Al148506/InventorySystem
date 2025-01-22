@@ -1,4 +1,4 @@
-##Inventory System
+## Inventory System
 A modern system for managing inventories, designed for small and medium-sized businesses. This application enables you to efficiently manage products, users, audit logs, and generate PDF reports. Developed using asp.net, with the code languages ​​c# and javascript for the backend, razor pages, css and bootstrap for the frontend and a database in sql server for storage
 ### Features
 
@@ -10,7 +10,7 @@ A modern system for managing inventories, designed for small and medium-sized bu
 
 ## Setup
 1.  Clone the repository:
-   ```bash
+   bash
    git clone https://github.com/al148506/InventorySystem
 2. Open the project with Visual Studio 2022
 3. Update the appsettings.json file with your database connection string.
