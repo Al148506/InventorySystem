@@ -37,18 +37,19 @@ public partial class DbInventoryContext : DbContext
     private void AddAuditEntries()
     {
         var entries = ChangeTracker.Entries()
-            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted);
-        // Lista temporal para las entradas de auditoría
-        var auditEntries = new List<ChangeLog>();
+            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted)
+            .ToList(); // Convertir a lista para evitar múltiples enumeraciones
+
+        var auditEntries = new List<ChangeLog>(entries.Count); // Inicializar con la capacidad adecuada
 
         foreach (var entry in entries)
         {
             var auditEntry = new ChangeLog
             {
                 TableName = entry.Entity.GetType().Name,
-                DateMod = DateTime.Now,
-                UserId = GetCurrentUserId(), // Implementar un método para obtener el usuario actual
-                PrimaryKey = GetPrimaryKeyValue(entry) // Obtener el valor de la clave primaria
+                DateMod = DateTime.UtcNow, // Usar UTC para consistencia
+                UserId = GetCurrentUserId(),
+                PrimaryKey = GetPrimaryKeyValue(entry)
             };
 
             switch (entry.State)
@@ -71,20 +72,22 @@ public partial class DbInventoryContext : DbContext
                     break;
             }
 
-            // Agregar el registro a la tabla de auditoría
             auditEntries.Add(auditEntry);
         }
-        // Agregar las entradas de auditoría al contexto después de iterar
+
         ChangeLogs.AddRange(auditEntries);
     }
 
     // Obtener Propiedades Agregadas
     private Dictionary<string, object> GetAddedProperties(EntityEntry entry)
     {
+        var primaryKeyProperties = entry.Metadata.FindPrimaryKey()?.Properties.Select(p => p.Name).ToHashSet();
+
         return entry.Properties
-            .Where(p => p.CurrentValue != null)
+            .Where(p => p.CurrentValue != null && (primaryKeyProperties == null || !primaryKeyProperties.Contains(p.Metadata.Name)))
             .ToDictionary(p => p.Metadata.Name, p => p.CurrentValue);
     }
+
 
     // Obtener Valores Originales
     private Dictionary<string, object> GetOriginalValues(EntityEntry entry)

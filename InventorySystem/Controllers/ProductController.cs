@@ -24,6 +24,8 @@ namespace InventorySystem.Controllers
         }
         public async Task<IActionResult> Index(string searchName, int? categoryId, int? locationId, int? numpag, string currentFilter, string currentCategory, string currentLocation)
         {
+
+            ViewData["Is64Bit"] = Environment.Is64BitProcess;
             // Obtener todos los productos
             var productsQuery = _context.Products
                 .Include(p => p.Category)
@@ -75,6 +77,7 @@ namespace InventorySystem.Controllers
         {
             ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName");
             ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName");
+            ViewData["State"] = GetStateItems();
 
             return View();
         }
@@ -84,6 +87,9 @@ namespace InventorySystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductViewModel model, IFormFile Image)
         {
+            ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName");
+            ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName");
+            ViewData["State"] = GetStateItems();
             if (ModelState.IsValid)
             {
                 try
@@ -173,7 +179,8 @@ namespace InventorySystem.Controllers
                 ImageRoot = product.ImageRoot
             };
             ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName");
-            ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName");
+            ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName");  
+            ViewData["State"] = GetStateItems(); 
             return View(model);
         }
 
@@ -207,11 +214,13 @@ namespace InventorySystem.Controllers
                 product.ImageRoot = $"/Images/{fileName}";
             }
             product.LastModDate = DateTime.Now;
-                _context.Products.Update(product);
-                await _context.SaveChangesAsync();
-                ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName");
-                ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName");
-                return RedirectToAction(nameof(Index));
+            _context.Products.Update(product);
+            await _context.SaveChangesAsync();
+            ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName");
+            ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName");
+            ViewData["State"] = GetStateItems();
+
+            return RedirectToAction(nameof(Index));
            
         }
         [HttpGet]
@@ -222,6 +231,18 @@ namespace InventorySystem.Controllers
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+        private List<SelectListItem> GetStateItems()
+        {
+            return new List<SelectListItem>
+    {
+        new SelectListItem { Text = "New", Value = "New" },
+        new SelectListItem { Text = "Excellent", Value = "Excellent" },
+        new SelectListItem { Text = "Very Good", Value = "Very Good" },
+        new SelectListItem { Text = "Good", Value = "Good" },
+        new SelectListItem { Text = "Used", Value = "Used" },
+        new SelectListItem { Text = "For parts or not working", Value = "For parts or not working" }
+    };
         }
 
         public IActionResult GeneratePdf()

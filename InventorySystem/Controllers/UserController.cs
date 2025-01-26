@@ -27,6 +27,7 @@ namespace InventorySystem.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(string searchName, string dateFilter, string orderFilter, int? numpag, string currentFilter, string currentOrder)
         {
+            ViewData["Is64Bit"] = Environment.Is64BitProcess;
             // Obtener todos los usuarios con sus relaciones necesarias
             var usersQuery = _context.UserLogins
                 .Include(p => p.IdRolNavigation)
@@ -94,10 +95,18 @@ namespace InventorySystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(RegisterViewModel model)
         {
+            ViewData["Rol"] = new SelectList(_context.UserRols, "IdRol", "RolName", 3);
             if (ModelState.IsValid)
             {
                 try
                 {
+                    // Verificar si el correo ya existe
+                    var emailExists = await _context.UserLogins.AnyAsync(u => u.UserMail == model.UserMail);
+                    if (emailExists)
+                    {
+                        ViewData["Mensaje"] = "This email is already registered. Please choose another one";
+                        return View(model);
+                    }
                     var user = new UserLogin()
                     {
                         UserName = model.UserName,
@@ -108,17 +117,17 @@ namespace InventorySystem.Controllers
                     };
                     if (string.IsNullOrWhiteSpace(model.UserMail) || !commonLib.IsValidEmail(model.UserMail))
                     {
-                        ViewData["Mensaje"] = "Introduzca un correo valido";
+                        ViewData["Mensaje"] = "Please enter a valid email";
                         return View(model);
                     }
                     if (string.IsNullOrWhiteSpace(model.UserPassword))
                     {
-                        ViewData["Mensaje"] = "Introduzca una contraseña valida";
+                        ViewData["Mensaje"] = "Please enter a valid password";
                         return View(model);
                     }
                     if (model.UserPassword != model.ConfirmPassword)
                     {
-                        ViewData["Mensaje"] = "Las contraseñas no coinciden.";
+                        ViewData["Mensaje"] = "Passwords do not match ";
                         return View(model);
                     }
 
@@ -139,7 +148,7 @@ namespace InventorySystem.Controllers
                 {
                     Console.WriteLine($"Error: {error.ErrorMessage}");
                 }
-                ViewData["Rol"] = new SelectList(_context.UserRols, "IdRol", "RolName", 3);
+               
                 return View(model);
             }
         }

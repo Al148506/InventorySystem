@@ -12,6 +12,7 @@ namespace InventorySystem.Models.ViewModels
         [Required]
         public string? Description { get; set; }
         [Required]
+        [Range(0, int.MaxValue, ErrorMessage = "Quantity must be a number greater than or equal to 0.")]
         public int? Quantity { get; set; }
         [Required]
         public string? State { get; set; }

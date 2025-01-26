@@ -26,7 +26,6 @@
                 </select>
             </div>
         </div>
-
         <!-- Botones -->
         <div class="me-2">
             <div class="form-group">
@@ -40,13 +39,16 @@
                 <a asp-action="Index" class="btn btn-primary form-control">Complete List</a>
             </div>
         </div>
-        <div class="me-2">
-            <div class="form-group">
-                <label>&nbsp;</label>
-                <a asp-action="GeneratePdf" class="btn btn-success">Export All to PDF</a>
+        @if ((bool)ViewData["Is64Bit"])
+        {
+            <div class="me-2">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <a asp-action="GeneratePdf" class="btn btn-success">Export All to PDF</a>
+                </div>
             </div>
+        }
 
-        </div>
         <div class="ms-auto">
             <div class="form-group">
                 <label>&nbsp;</label>

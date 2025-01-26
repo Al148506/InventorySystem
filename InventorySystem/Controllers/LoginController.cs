@@ -38,8 +38,13 @@ namespace InventorySystem.Controllers
         }
 
         [HttpPost]
-        public IActionResult Register(RegisterViewModel user) 
+        public async Task<IActionResult> RegisterAsync(RegisterViewModel user) 
         {
+            var captchaResponse = Request.Form["g-recaptcha-response"];
+            if (string.IsNullOrEmpty(captchaResponse) || !await ValidateCaptcha(captchaResponse))
+            {
+                return Json(new { success = false, message = "Por favor, resuelva el reCAPTCHA para continuar." });
+            }
             // Validar si el correo está vacío
             if (string.IsNullOrWhiteSpace(user.UserMail))
             {

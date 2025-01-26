@@ -20,6 +20,7 @@ namespace InventorySystem.Controllers
         }
         public async Task<IActionResult> Index(string searchName, string orderFilter, int? numpag, string currentFilter, string currentOrder, string actionType, string currentActionType)
         {
+            ViewData["Is64Bit"] = Environment.Is64BitProcess;
             var logsQuery = _context.ChangeLogs
                 .OrderByDescending(log => log.DateMod)
                 .AsQueryable();

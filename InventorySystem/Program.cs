@@ -8,7 +8,8 @@ using InventorySystem.CommonLib;
 var builder = WebApplication.CreateBuilder(args);
 // Configuración de libwkhtmltox
 var context = new CustomAssemblyLoadContext();
-context.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\lib\\", "libwkhtmltox.dll"));
+var enviroment = Environment.Is64BitProcess ? "64bits" : "32bits";
+context.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(), $"wwwroot\\lib\\{enviroment}\\", "libwkhtmltox.dll"));
 // Add services to the container.
 builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 builder.Services.AddControllersWithViews();

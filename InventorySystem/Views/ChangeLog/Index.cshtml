@@ -35,15 +35,26 @@
             </div>
         </div>
         <div class="me-2">
-            <button type="submit" class="btn btn-primary form-control">Search</button>
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn btn-primary form-control">Search</button>
+            </div>
         </div>
         <div class="me-2">
-            <a asp-action="Index" class="btn btn-secondary form-control">Clear</a>
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <a asp-action="Index" class="btn btn-secondary form-control">Clear</a>
+            </div>
         </div>
-        <div class="me-2">
-            <a asp-action="GeneratePdf" class="btn btn-success">Export All to PDF</a>
-        </div>
-
+        @if ((bool)ViewData["Is64Bit"])
+        {
+            <div class="me-2">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <a asp-action="GeneratePdf" class="btn btn-success">Export All to PDF</a>
+                </div>
+            </div>
+        }
     </div>
 </form>
 
