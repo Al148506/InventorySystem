@@ -21,10 +21,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="wwwroot\Images\" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<None Include="wwwroot\Images\iphone16.png" />
 		<None Include="wwwroot\Images\laptop.png" />
 	</ItemGroup>

@@ -31,7 +31,6 @@ html {
     top: -75px;
     border-radius: 50%;
     background: #1e3a8a; /* Azul rey */
-    padding: 10px;
     text-align: center;
 }
 
@@ -39,11 +38,15 @@ html {
     height: 150px;
     width: 150px;
     border-radius: 50%;
-    border: 2px solid white;
 }
 
+.demo-credentials {
+    margin-top: 70px; /* Ajusta este valor según sea necesario */
+    padding: 5px;
+    
+}
 .form_container {
-    margin-top: 100px;
+    margin-top: 0px;
 }
 
 .login_btn {
