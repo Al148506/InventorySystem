@@ -10,9 +10,7 @@ A modern system for managing inventories, designed for small and medium-sized bu
 - Security: Management of user accounts with specific permissions, use of recaptcha to control logins and forms validations in frontend and backen
   
 ### Screenshots
-![Products]([https://github.com/Al148506/ChatAISystem/blob/dbd6afdb98b8c66f6e022304fc152e1641abdcd9/CharacterLuke.png](https://github.com/Al148506/InventorySystem/blob/0ac0d76e3267fb5d7aa6bc33fc514ee05b5da2a9/Products.png)]
-
-![Users](https://github.com/Al148506/ChatAISystem/blob/dbd6afdb98b8c66f6e022304fc152e1641abdcd9/CharacterLuke.png)
+![Products](https://github.com/Al148506//InventorySystem/blob/0ac0d76e3267fb5d7aa6bc33fc514ee05b5da2a9/Products.png)
 ## Setup
 1.  Clone the repository:
    bash
