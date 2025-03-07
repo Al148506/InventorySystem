@@ -1,41 +1,47 @@
 ﻿/* Contenedor de tabla con desplazamiento horizontal */
 .table-container {
+    width: 100%;
     overflow-x: auto;
-    
+    margin-bottom: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
 /* Tabla personalizada */
 .table-custom {
     width: 100%;
-    border-collapse: collapse;
+    min-width: 1200px; /* Aumentado para dar más espacio */
+    border-collapse: separate;
+    border-spacing: 0;
     table-layout: fixed;
 }
- 
-    /* Encabezado de la tabla */
-    .table-custom th {
+/* Encabezado de la tabla */
+.table-custom th {
         background-color: #212529;
         color: #fff;
         padding: 12px;
         text-align: left;
         white-space: nowrap;
-    }
-
-    /* Filas de la tabla */
-    .table-custom td {
+        overflow: hidden;
+        text-overflow: ellipsis; /* Agregado para manejar texto largo */
+}
+/* Filas de la tabla */
+.table-custom td {
         padding: 12px;
         border: 1px solid #ddd;
         font-size: 14px;
         overflow: hidden;
+        text-overflow: ellipsis; /* Agregado para manejar texto largo */
+        white-space: nowrap; /* Opcionalmente, para evitar saltos de línea */
     }
 
-    /* Alternar color de las filas */
-    .table-custom tbody tr:nth-child(even) {
-        background-color: #f2f2f2;
+/* Alternar color de las filas */
+.table-custom tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
     }
 
-    /* Efecto hover en las filas */
-    .table-custom tbody tr:hover {
-        background-color: #e6f7ff;
+/* Efecto hover en las filas */
+.table-custom tbody tr:hover {
+    background-color: #e6f7ff;
     }
 
 /* Botón de acción */
@@ -44,6 +50,19 @@
     border: none;
 }
 
-    .btn-primary:hover {
+.btn-primary:hover {
         background-color: #0056b3;
     }
+/*Diseño responsive*/
+@media (max-width: 768px) {
+    .table-custom th,
+    .table-custom td {
+        white-space: nowrap;
+    }
+
+    .table-container {
+        max-width: 100vw;
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
