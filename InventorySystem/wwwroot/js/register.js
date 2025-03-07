@@ -1,43 +1,33 @@
 ﻿document.getElementById("registerForm").addEventListener("submit", async function (event) {
     event.preventDefault(); // Evitar el envío tradicional del formulario
-    // Limpiar errores previos
-    document.querySelectorAll(".errorMessage").forEach((error) => {
-        error.textContent = "";
-        error.classList.add("d-none");
-    });
+
+    // Clear previous error message
+    const errorField = document.querySelector(".errorMessage");
+    errorField.textContent = "";
+    errorField.classList.add("d-none");
+
     // Obtener los campos del formulario
     const emailField = document.querySelector('input[name="UserMail"]');
     const passwordField = document.querySelector('input[name="UserPassword"]');
     const confirmPasswordField = document.querySelector('input[name="ConfirmPassword"]');
-    let hasError = false;
+    let errorMessage = "";
 
-    // Validar correo
-    if (!emailField.value.trim()) {
-        showError(emailField, "Por favor, ingrese su correo electrónico.");
-        hasError = true;
-    } else if (!isValidEmail(emailField.value)) {
-        showError(emailField, "El correo electrónico no tiene un formato válido.");
-        hasError = true;
-    }
-    // Validar contraseña
-    if (!passwordField.value.trim()) {
-        showError(passwordField, "Por favor, ingrese su contraseña.");
-        hasError = true;
+    // Check fields
+    if (!emailField.value.trim() || !passwordField.value.trim() || !confirmPasswordField.value.trim()) {
+        errorMessage = "You must complete all the fields";
+    } else if (!isValidEmail(emailField.value.trim())) {
+        errorMessage = "The email address is not valid";
     } else if (passwordField.value.trim().length < 6) {
-    showError(passwordField, "La contraseña debe tener al menos 6 caracteres.");
-    hasError = true;
-}
-
-    // Validar confirmación de contraseña
-    if (passwordField.value.trim() !== confirmPasswordField.value.trim()) {
-        showError(confirmPasswordField, "Las contraseñas no coinciden.");
-        hasError = true;
+        errorMessage = "The password must be at least 6 characters long";
+    } else if (passwordField.value.trim() !== confirmPasswordField.value.trim()) {
+        errorMessage = "Passwords do not match";
     }
-
-    if (hasError) {
-        return; // Detener envío si hay errores
-    }0
-
+    // If there is an error, display it and stop the submission
+    if (errorMessage) {
+        errorField.textContent = errorMessage;
+        errorField.classList.remove("d-none");
+        return;
+    }
     // Obtener los datos del formulario
     const formData = new FormData(this);
 
@@ -55,9 +45,11 @@
                 alert(result.message); // Muestra mensaje de éxito
                 window.location.href = result.redirectUrl;
             } else {
-                const errorMessage = document.querySelector(".errorMessage");
+                // Mostrar el mensaje de error
                 errorMessage.textContent = result.message;
                 errorMessage.classList.remove("d-none");
+                grecaptcha.reset();
+                
             }
         } else {
             console.error("Error en la solicitud:", response.statusText);
@@ -66,17 +58,6 @@
         console.error("Error de red:", error);
     }
 });
-// Mostrar mensajes de error debajo de los campos
-function showError(field, message) {
-    // Buscar el contenedor de error asociado al campo de entrada
-    const errorContainer = field.closest(".input-group").nextElementSibling;
-
-    // Verificar si el contenedor existe y tiene la clase de error
-    if (errorContainer && errorContainer.classList.contains("errorMessage")) {
-        errorContainer.textContent = message; // Actualizar el mensaje de error
-        errorContainer.classList.remove("d-none"); // Mostrar el mensaje
-    }
-}
 
 function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

@@ -7,7 +7,7 @@ html {
 }
 
 .user_card {
-    height: 550px;
+    height: 650px;
     width: 350px;
     margin-top: auto;
     margin-bottom: auto;
@@ -28,7 +28,7 @@ html {
     position: absolute;
     height: 170px;
     width: 170px;
-    top: -75px;
+    top: -70px;
     border-radius: 50%;
     background: #1e3a8a; /* Azul rey */
     text-align: center;
@@ -76,6 +76,7 @@ html {
 .input_pass:focus {
     box-shadow: none !important;
     outline: 0px !important;
+    background-color: rgb( 252,252, 200) !important;
 }
 
 .custom-checkbox .custom-control-input:checked ~ .custom-control-label::before {

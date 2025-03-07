@@ -32,43 +32,41 @@ namespace InventorySystem.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-  
-
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> RegisterAsync(RegisterViewModel user) 
+        public async Task<IActionResult> RegisterAsync(RegisterViewModel user)
         {
             var captchaResponse = Request.Form["g-recaptcha-response"];
             if (string.IsNullOrEmpty(captchaResponse) || !await ValidateCaptcha(captchaResponse))
             {
-                return Json(new { success = false, message = "Por favor, resuelva el reCAPTCHA para continuar." });
+                return Json(new { success = false, message = "Please solve the reCAPTCHA to continue." });
             }
-            // Validar si el correo está vacío
+            // Validate if email is empty
             if (string.IsNullOrWhiteSpace(user.UserMail))
             {
-                return Json(new { success = false, message = "Por favor, ingrese su correo electrónico." });
+                return Json(new { success = false, message = "Please enter your email address." });
             }
 
-            // Validar formato del correo
+            // Validate email format
             if (!commonLib.IsValidEmail(user.UserMail))
             {
-                return Json(new { success = false, message = "El correo electrónico no tiene un formato válido." });
+                return Json(new { success = false, message = "The email address is not in a valid format." });
             }
 
-            // Validar si la contraseña está vacía
+            // Validate if password is empty
             if (string.IsNullOrWhiteSpace(user.UserPassword))
             {
-                return Json(new { success = false, message = "Por favor, ingrese su contraseña." });
+                return Json(new { success = false, message = "Please enter your password." });
             }
 
-            // Validar si las contraseñas coinciden
+            // Validate if passwords match
             if (user.UserPassword != user.ConfirmPassword)
             {
-                return Json(new { success = false, message = "Las contraseñas no coinciden." });
+                return Json(new { success = false, message = "The passwords do not match." });
             }
-            // Declarar parámetros
+            // Declare parameters
             var mailParam = new SqlParameter("@Mail", user.UserMail);
             var passwordParam = new SqlParameter("@Password", commonLib.ConverterSha256(user.UserPassword));
             var creationDateParam = new SqlParameter("@CreationDate", DateTime.Now);
@@ -76,22 +74,21 @@ namespace InventorySystem.Controllers
             var registredParam = new SqlParameter("@Registred", SqlDbType.Bit) { Direction = ParameterDirection.Output };
             var messageParam = new SqlParameter("@Message", SqlDbType.VarChar, 100) { Direction = ParameterDirection.Output };
 
-            // Ejecutar procedimiento
+            // Execute stored procedure
             _context.Database.ExecuteSqlRaw(
-                "EXEC sp_RegisterUser @Mail, @Password,@CreationDate,@IdRol, @Registred OUTPUT, @Message OUTPUT",
-                mailParam, passwordParam, creationDateParam,idRolParam, registredParam, messageParam);
-            // Leer parámetros de salida
+                "EXEC sp_RegisterUser @Mail, @Password, @CreationDate, @IdRol, @Registred OUTPUT, @Message OUTPUT",
+                mailParam, passwordParam, creationDateParam, idRolParam, registredParam, messageParam);
+            // Read output parameters
             bool result = (bool)registredParam.Value;
             string message = messageParam.Value.ToString();
 
             if (result)
             {
-
-                return Json(new { success = true, message = "Usuario registrado exitosamente.", redirectUrl = Url.Action("Index", "Login") });
+                return Json(new { success = true, message = "User registered successfully.", redirectUrl = Url.Action("Index", "Login") });
             }
             else
             {
-                return Json(new { success = false, message = "Este correo ya ha sido registrado" });
+                return Json(new { success = false, message = "This email address has already been registered" });
             }
         }
 
@@ -100,17 +97,17 @@ namespace InventorySystem.Controllers
         {
             try
             {
-                // Verificar si el reCAPTCHA fue resuelto
+                // Verify if the reCAPTCHA was solved
                 var captchaResponse = Request.Form["g-recaptcha-response"];
                 if (string.IsNullOrEmpty(captchaResponse) || !await ValidateCaptcha(captchaResponse))
                 {
-                    return Json(new { success = false, message = "Por favor, resuelva el reCAPTCHA para continuar." });
+                    return Json(new { success = false, message = "Please solve the reCAPTCHA to continue." });
                 }
 
-                // Lógica existente para validar credenciales
+                // Validate credentials
                 if (string.IsNullOrWhiteSpace(model.UserMail) || string.IsNullOrWhiteSpace(model.UserPassword))
                 {
-                    return Json(new { success = false, message = "Por favor, ingrese su correo y contraseña." });
+                    return Json(new { success = false, message = "Please enter your email and password." });
                 }
 
                 model.UserPassword = commonLib.ConverterSha256(model.UserPassword);
@@ -119,10 +116,10 @@ namespace InventorySystem.Controllers
 
                 if (result == null)
                 {
-                    return Json(new { success = false, message = "Correo o contraseña incorrectos." });
+                    return Json(new { success = false, message = "Incorrect email or password." });
                 }
 
-                // Guardar sesión y redirigir
+                // Save session and redirect
                 HttpContext.Session.SetInt32("IdUser", result.IdUser);
                 HttpContext.Session.SetString("UserMail", result.UserMail);
                 HttpContext.Session.SetInt32("IdRol", result.IdRol ?? 0);
@@ -132,7 +129,7 @@ namespace InventorySystem.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
-                return Json(new { success = false, message = "Ocurrió un error inesperado. Inténtelo de nuevo." });
+                return Json(new { success = false, message = "An unexpected error occurred. Please try again." });
             }
         }
 
@@ -152,15 +149,12 @@ namespace InventorySystem.Controllers
             }
         }
 
-
-        // Clase para mapear la respuesta del reCAPTCHA
+        // Class to map the reCAPTCHA response
         private class CaptchaResult
         {
             public bool success { get; set; }
-            public string challenge_ts { get; set; } // Marca de tiempo del desafío
-            public string hostname { get; set; } // Nombre del host del cliente
+            public string challenge_ts { get; set; } // Challenge timestamp
+            public string hostname { get; set; } // Client hostname
         }
-
-
     }
 }
