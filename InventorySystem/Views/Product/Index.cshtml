@@ -43,21 +43,23 @@
                 <a asp-action="Index" class="btn btn-primary form-control">Complete List</a>
             </div>
         </div>
+        <!-- Forzar salto de línea -->
+        <div class="w-100"></div>
         @if ((bool)ViewData["Is64Bit"])
         {
             <div class="me-2">
                 <div class="form-group">
                     <label>&nbsp;</label>
-                    <a asp-action="GeneratePdf" class="btn btn-success">Export All to PDF</a>
+                    <a asp-action="GeneratePdf" class="btn btn-success">Export to PDF</a>
                 </div>
             </div>
         }
-        
-        <!-- Botón Nuevo Producto -->
         <div class="ms-auto">
             <div class="form-group">
                 <label>&nbsp;</label>
-                <a asp-controller="Product" asp-action="Create" class="btn btn-success">New Product</a>
+                <a asp-controller="Product" asp-action="Create" class="btn btn-success form-control">
+                    Create Product
+                </a>
             </div>
         </div>
     </div>
@@ -123,41 +125,8 @@
             }
         </tbody>
     </table>
-</div>
-    @{
-        var previousDisabled = !Model.PreviousPages ? "disabled" : "";
-        var nextDisabled = !Model.LaterPages ? "disabled" : "";
-    }
-    <div>
-        <!-- Botón Anterior -->
-        <a asp-action="Index"
-           asp-route-categoryId="@ViewData["CurrentCategory"]"
-           asp-route-locationId="@ViewData["CurrentLocation"]"
-           asp-route-numpag="@(Model.InitialPage - 1)"
-           asp-route-currentFilter="@ViewData["CurrentFilter"]"
-           class="btn btn-primary @previousDisabled">Back</a>
-
-        <!-- Paginación -->
-        @for (var i = 1; i <= Model.TotalPages; i++)
-        {
-            var activepage = (i == Model.InitialPage) ? "active" : "";
-            <a asp-action="Index"
-               asp-route-categoryId="@ViewData["CurrentCategory"]"
-               asp-route-locationId="@ViewData["CurrentLocation"]"
-               asp-route-numpag="@i"
-               asp-route-currentFilter="@ViewData["CurrentFilter"]"
-               class="btn btn-primary @activepage">@i</a>
-        }
-
-        <!-- Botón Siguiente -->
-        <a asp-action="Index"
-           asp-route-categoryId="@ViewData["CurrentCategory"]"
-           asp-route-locationId="@ViewData["CurrentLocation"]"
-           asp-route-numpag="@(Model.InitialPage + 1)"
-           asp-route-currentFilter="@ViewData["CurrentFilter"]"
-           class="btn btn-primary @nextDisabled">Next</a>
-    </div>
-
+    <!-- Paginacion -->
+    @await Html.PartialAsync("_Pagination", Model)
 
     @section Scripts{
         <script>

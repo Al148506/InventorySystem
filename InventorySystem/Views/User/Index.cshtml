@@ -44,7 +44,7 @@
             <div class="me-2">
                 <div class="form-group">
                     <label>&nbsp;</label>
-                    <a asp-action="GeneratePdf" class="btn btn-success">Export All to PDF</a>
+                    <a asp-action="GeneratePdf" class="btn btn-success">Export to PDF</a>
                 </div>
             </div>
         }
@@ -113,35 +113,8 @@
         </tbody>
     </table>
 </div>
-<div class="d-flex justify-content-center my-3">
-    <!-- Botón Anterior -->
-    <a asp-action="Index"
-       asp-route-orderFilter="@ViewData["CurrentOrder"]"
-       asp-route-dateFilter="@ViewData["CurrentDateFilter"]"
-       asp-route-numpag="@(Model.InitialPage - 1)"
-       asp-route-currentFilter="@ViewData["CurrentFilter"]"
-       class="btn btn-primary @(!Model.PreviousPages ? "disabled" : "")">Back</a>
-
-    <!-- Paginación -->
-    @for (var i = 1; i <= Model.TotalPages; i++)
-    {
-        var activepage = (i == Model.InitialPage) ? "active" : "";
-        <a asp-action="Index"
-           asp-route-orderFilter="@ViewData["CurrentOrder"]"
-           asp-route-dateFilter="@ViewData["CurrentDateFilter"]"
-           asp-route-numpag="@i"
-           asp-route-currentFilter="@ViewData["CurrentFilter"]"
-           class="btn btn-outline-primary mx-1 @activepage">@i</a>
-    }
-
-    <!-- Botón Siguiente -->
-    <a asp-action="Index"
-       asp-route-orderFilter="@ViewData["CurrentOrder"]"
-       asp-route-dateFilter="@ViewData["CurrentDateFilter"]"
-       asp-route-numpag="@(Model.InitialPage + 1)"
-       asp-route-currentFilter="@ViewData["CurrentFilter"]"
-       class="btn btn-primary @(!Model.LaterPages ? "disabled" : "")">Next</a>
-</div>
+<!-- Paginacion -->
+@await Html.PartialAsync("_Pagination", Model)
 
 @section Scripts{
     <script>

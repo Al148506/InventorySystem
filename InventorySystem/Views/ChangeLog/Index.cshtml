@@ -136,37 +136,9 @@
         </div>
     </div>
 </div>
+<!-- Paginacion-->
+@await Html.PartialAsync("_Pagination", Model)
 
-<div class="d-flex justify-content-center my-3">
-    <!-- Botón Anterior -->
-    <a asp-action="Index"
-       asp-route-numpag="@(Model.InitialPage - 1)"
-       asp-route-searchName="@ViewData["CurrentFilter"]"
-       asp-route-orderFilter="@ViewData["CurrentOrder"]"
-       asp-route-actionType="@ViewData["currentActionType"]"
-
-       class="btn btn-primary @(!Model.PreviousPages ? "disabled" : "")">Back</a>
-
-    <!-- Paginación -->
-    @for (var i = 1; i <= Model.TotalPages; i++)
-    {
-        var activePage = (i == Model.InitialPage) ? "active" : "";
-        <a asp-action="Index"
-           asp-route-numpag="@i"
-           asp-route-searchName="@ViewData["CurrentFilter"]"
-           asp-route-orderFilter="@ViewData["CurrentOrder"]"
-           asp-route-actionType="@ViewData["currentActionType"]"
-           class="btn btn-outline-primary mx-1 @activePage">@i</a>
-    }
-
-    <!-- Botón Siguiente -->
-    <a asp-action="Index"
-       asp-route-numpag="@(Model.InitialPage + 1)"
-       asp-route-searchName="@ViewData["CurrentFilter"]"
-       asp-route-orderFilter="@ViewData["CurrentOrder"]"
-       asp-route-actionType="@ViewData["currentActionType"]"
-       class="btn btn-primary @(!Model.LaterPages ? "disabled" : "")">Next</a>
-</div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

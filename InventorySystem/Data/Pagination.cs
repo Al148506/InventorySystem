@@ -2,7 +2,7 @@
 
 namespace InventorySystem.Data
 {
-    public class Pagination<T> : List<T>
+    public class Pagination<T> : List<T>, IPagination
     {
         public int InitialPage { get; private set; }
         public int TotalPages { get; private set; }
