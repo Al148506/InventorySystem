@@ -2,17 +2,9 @@
     event.preventDefault(); // Evitar el envío tradicional del formulario
 
     const formData = new FormData(this);
-    const loadingOverlay = document.createElement("div");
-    loadingOverlay.classList.add("loading-overlay");
-    loadingOverlay.innerHTML = `
-        <div class="loading-spinner">
-            <div class="spinner-border text-primary" role="status">
-                <span class="sr-only">Loading...</span>
-            </div>
-            <p class="loading-text">Authenticating, please wait...</p>
-        </div>
-    `;
-    document.body.appendChild(loadingOverlay); // Mostrar el loader
+    const loadingOverlay = document.getElementById("loading");
+    // Mostrar el loader
+    loadingOverlay.classList.remove("d-none");
     try {
         const response = await fetch('/Login/ValidateLogin', {
             method: "POST",
