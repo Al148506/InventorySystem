@@ -2,7 +2,17 @@
     event.preventDefault(); // Evitar el envío tradicional del formulario
 
     const formData = new FormData(this);
-
+    const loadingOverlay = document.createElement("div");
+    loadingOverlay.classList.add("loading-overlay");
+    loadingOverlay.innerHTML = `
+        <div class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <p class="loading-text">Authenticating, please wait...</p>
+        </div>
+    `;
+    document.body.appendChild(loadingOverlay); // Mostrar el loader
     try {
         const response = await fetch('/Login/ValidateLogin', {
             method: "POST",
@@ -35,6 +45,9 @@
         }
     } catch (error) {
         console.error("Error de red:", error);
+    } finally {
+        // Ocultar el loader
+        loadingOverlay.remove();
     }
 });
 
