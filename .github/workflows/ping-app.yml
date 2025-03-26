@@ -3,6 +3,7 @@ name: Keep App Alive
 on:
   schedule:
     - cron: '*/10 * * * *'  # Ejecuta cada 10 minutos
+  workflow_dispatch:  # Add this line to enable manual triggering
 
 jobs:
   ping-app:
