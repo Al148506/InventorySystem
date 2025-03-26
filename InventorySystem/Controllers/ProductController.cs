@@ -22,7 +22,8 @@ namespace InventorySystem.Controllers
             _context = context;
             _converter = converter;
         }
-        public async Task<IActionResult> Index(string searchName, int? categoryId, int? locationId, int? numpag, string currentFilter, string currentCategory, string currentLocation)
+        public async Task<IActionResult> Index(string searchName, int? categoryId, int? locationId, int? numpag, string currentFilter, string currentCategory, string currentLocation, 
+            string dateFilter, string orderFilter , string currentDate, string currentOrder)
         {
 
             ViewData["Is64Bit"] = Environment.Is64BitProcess;
@@ -58,9 +59,38 @@ namespace InventorySystem.Controllers
             {
                 productsQuery = productsQuery.Where(p => p.IdLocation == locationId.Value);
             }
+
+            // Aplicar ordenamiento dinámico
+            if (!string.IsNullOrEmpty(orderFilter) && !string.IsNullOrEmpty(dateFilter))
+            {
+                productsQuery = (orderFilter, dateFilter) switch
+                {
+                    ("asc", "creation") => productsQuery.OrderBy(p => p.CreationDate),
+                    ("desc", "creation") => productsQuery.OrderByDescending(p => p.CreationDate),
+                    ("asc", "modification") => productsQuery.OrderBy(p => p.LastModDate),
+                    ("desc", "modification") => productsQuery.OrderByDescending(p => p.LastModDate),
+                    _ => productsQuery // Mantener sin cambios si no coincide ningún filtro
+                };
+
+            }
+
+            // Preparar las listas para los SelectList conservando valores seleccionados
+            ViewBag.dateFilter = new SelectList(new[]
+            {
+                new { Text = "Creation Date", Value = "creation" },
+                new { Text = "Last Modification Date", Value = "modification" }
+            }, "Value", "Text", dateFilter); // Selección actual
+
+                    ViewBag.orderFilter = new SelectList(new[]
+                    {
+                new { Text = "Ascendent Order", Value = "asc" },
+                new { Text = "Descendent Order", Value = "desc" }
+            }, "Value", "Text", orderFilter); // Selección actual
             //Mantiene los filtros durante paginacion
             ViewData["CurrentCategory"] = categoryId;
             ViewData["CurrentLocation"] = locationId;
+            ViewData["currentDate"] = dateFilter;
+            ViewData["currentOrder"] = orderFilter;
 
             // Pasar datos a la vista
             ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName",categoryId);

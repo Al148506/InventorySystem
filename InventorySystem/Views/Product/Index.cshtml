@@ -29,6 +29,24 @@
                 </select>
             </div>
         </div>
+        <!-- Filtrado por tipo de fecha -->
+        <div class="me-2">
+            <div class="form-group">
+                <label for="dateFilter">Order by</label>
+                <select name="dateFilter" class="form-control" asp-items="ViewBag.dateFilter" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    <option value="">-- Seleccione --</option>
+                </select>
+            </div>
+        </div>
+        <!-- Filtrado por orden de fecha -->
+        <div class="me-2">
+            <div class="form-group">
+                <label for="orderFilter">Sort by</label>
+                <select name="orderFilter" class="form-control" asp-items="ViewBag.orderFilter" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    <option value="">-- Seleccione --</option>
+                </select>
+            </div>
+        </div>
         <!-- Botones -->
         <div class="me-2">
             <div class="form-group">
@@ -44,8 +62,8 @@
             </div>
         </div>
         <!-- Forzar salto de línea -->
-        <div class="w-100"></div>
-        @if ((bool)ViewData["Is64Bit"])
+        @*<div class="w-100"></div>*@
+        @if (!(bool)ViewData["Is64Bit"])
         {
             <div class="me-2">
                 <div class="form-group">
