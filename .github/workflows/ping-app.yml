@@ -1,0 +1,12 @@
+name: Keep App Alive
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'  # Ejecuta cada 10 minutos
+
+jobs:
+  ping-app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send request to keep app alive
+        run: curl -X GET "https://inventorysystemacg.azurewebsites.net"
