@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using DinkToPdf;
 using DinkToPdf.Contracts;
 using InventorySystem.CommonLib;
+using InventorySystem.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 // Configuración de libwkhtmltox
@@ -29,6 +30,7 @@ builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add<ValidateSessionAttribute>();
 });
+builder.Services.AddHostedService<KeepAliveService>(); // Evita cierre de conexion
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

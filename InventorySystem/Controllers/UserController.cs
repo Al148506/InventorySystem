@@ -25,26 +25,26 @@ namespace InventorySystem.Controllers
             _converter = converter;
         }
         [HttpGet]
-        public async Task<IActionResult> Index(string searchName, string dateFilter, string orderFilter, int? numpag, string currentFilter, string currentOrder)
+        public async Task<IActionResult> Index(string searchName, string dateFilter, string orderFilter, int? numpag, string currentFilter)
         {
             ViewData["Is64Bit"] = Environment.Is64BitProcess;
-            // Obtener todos los usuarios con sus relaciones necesarias
+
+            // Inicializar consulta de usuarios con sus relaciones
             var usersQuery = _context.UserLogins
                 .Include(p => p.IdRolNavigation)
                 .AsQueryable();
-            //Paginacion
+
+            // Manejo de búsqueda
             if (!string.IsNullOrEmpty(searchName))
             {
-                numpag = 1;
+                numpag = 1; // Reiniciar paginación si hay nueva búsqueda
             }
             else
             {
-                searchName = currentFilter;
+                searchName = currentFilter; // Mantener el filtro actual si no hay nueva búsqueda
             }
             ViewData["CurrentFilter"] = searchName;
 
-
-            // Aplicar filtro de búsqueda por nombre
             if (!string.IsNullOrEmpty(searchName))
             {
                 usersQuery = usersQuery.Where(p => p.UserName.Contains(searchName));
@@ -59,28 +59,33 @@ namespace InventorySystem.Controllers
                     ("desc", "creation") => usersQuery.OrderByDescending(p => p.CreationDate),
                     ("asc", "modification") => usersQuery.OrderBy(p => p.LastModDate),
                     ("desc", "modification") => usersQuery.OrderByDescending(p => p.LastModDate),
-                    _ => usersQuery // Mantener sin cambios si no coincide ningún filtro
+                    _ => usersQuery
                 };
             }
+
+            // Almacenar filtros actuales en ViewData
             ViewData["CurrentOrder"] = orderFilter;
             ViewData["CurrentDateFilter"] = dateFilter;
-            // Preparar las listas para los SelectList conservando valores seleccionados
+
+            // Preparar listas de selección con valores actuales
             ViewBag.dateFilter = new SelectList(new[]
             {
         new { Text = "Creation Date", Value = "creation" },
         new { Text = "Last Modification Date", Value = "modification" }
-    }, "Value", "Text", dateFilter); // Selección actual
+    }, "Value", "Text", dateFilter);
 
             ViewBag.orderFilter = new SelectList(new[]
             {
         new { Text = "Ascendent Order", Value = "asc" },
         new { Text = "Descendent Order", Value = "desc" }
-    }, "Value", "Text", orderFilter); // Selección actual
+    }, "Value", "Text", orderFilter);
 
-            //var users = await usersQuery.ToListAsync();
+            // Aplicar paginación
             int regQuantity = 6;
             return View(await Pagination<UserLogin>.CreatePagination(usersQuery.AsNoTracking(), numpag ?? 1, regQuantity));
         }
+
+
 
         [HttpGet]
         public IActionResult Create()
