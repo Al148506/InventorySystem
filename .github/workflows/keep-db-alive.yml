@@ -1,0 +1,13 @@
+name: Keep Azure SQL Alive
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'  # Ejecuta cada 10 minutos
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Keep Database Alive
+        run: |
+          sqlcmd -S tcp:inventorysystemacg.database.windows.net,1433 -U ${{ secrets.DB_USER }} -P ${{ secrets.DB_PASSWORD }} -d DB_inventorySystem -Q "SELECT 1"
