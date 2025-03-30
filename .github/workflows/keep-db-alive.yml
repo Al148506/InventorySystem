@@ -3,7 +3,6 @@ name: Keep Azure SQL Alive
 on:
   schedule:
     - cron: '*/10 * * * *'  # Ejecuta cada 10 minutos
-  workflow_dispatch:
 
 jobs:
   keep-db-alive:
@@ -13,12 +12,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Install sqlcmd
+    - name: Install prerequisites
       run: |
-        curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-        curl -sSL https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
+        curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+        curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
         sudo apt-get update
-        sudo apt-get install mssql-tools unixodbc-dev
+        sudo ACCEPT_EULA=Y apt-get install -y mssql-tools
 
-    - name: Verify connection to Azure SQL
-      run: sqlcmd -S tcp:inventorysystemacg.database.windows.net,1433 -U ${{ secrets.DB_USERNAME }} -P ${{ secrets.DB_PASSWORD }} -d DB_inventorySystem -Q "SELECT 1"
+    - name: Use mssql-tools
+      run: |
+        # Your commands using mssql-tools here
