@@ -9,9 +9,10 @@ jobs:
   keep-alive:
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/mssql-tools  # Imagen con SQLCMD preinstalado
+      image: mcr.microsoft.com/mssql/server:latest  # Imagen con SQLCMD
 
     steps:
-      - name: Keep Database Alive
+      - name: Install SQLCMD
         run: |
-          sqlcmd -S tcp:inventorysystemacg.database.windows.net,1433 -U ${{ secrets.DB_USER }} -P ${{ secrets.DB_PASSWORD }} -d DB_inventorySystem -Q "SELECT 1"
+          /opt/mssql-tools/bin/sqlcmd -S tcp:inventorysystemacg.database.windows.net,1433 -U ${{ secrets.DB_USER }} -P ${{ secrets.DB_PASSWORD }} -d DB_inventorySystem -Q "SELECT 1"
+
