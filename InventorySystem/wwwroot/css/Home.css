@@ -1,0 +1,63 @@
+﻿.hero-section {
+    background: linear-gradient(to right, #4e54c8, #8f94fb);
+    color: white;
+    padding: 3rem 0;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.feature-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    height: 100%;
+    border: none;
+}
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+.icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(78, 84, 200, 0.1);
+    margin-bottom: 1rem;
+}
+
+.action-btn {
+    padding: 0.5rem 1.5rem;
+    border-radius: 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.action-btn-primary {
+    background-color: #4e54c8;
+    border-color: #4e54c8;
+}
+
+    .action-btn-primary:hover {
+        background-color: #3a3f9e;
+        border-color: #3a3f9e;
+    }
+
+.action-btn-outline {
+    border: 2px solid white;
+    color: white;
+}
+
+    .action-btn-outline:hover {
+        background-color: white;
+        color: #4e54c8;
+    }
+
+.feature-icon {
+    color: #4e54c8;
+}
+

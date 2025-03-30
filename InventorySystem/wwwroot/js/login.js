@@ -2,7 +2,9 @@
     event.preventDefault(); // Evitar el envío tradicional del formulario
 
     const formData = new FormData(this);
-
+    const loadingOverlay = document.getElementById("loading");
+    // Mostrar el loader
+    loadingOverlay.classList.remove("d-none");
     try {
         const response = await fetch('/Login/ValidateLogin', {
             method: "POST",
@@ -35,6 +37,9 @@
         }
     } catch (error) {
         console.error("Error de red:", error);
+    } finally {
+        // Ocultar el loader
+        loadingOverlay.remove();
     }
 });
 

@@ -1,0 +1,56 @@
+﻿@{
+    int totalPages = Model.TotalPages;
+    int currentPage = Model.InitialPage;
+    int maxPageButtons = 4;
+    int startPage = Math.Max(1, currentPage - maxPageButtons / 2);
+    int endPage = Math.Min(totalPages, startPage + maxPageButtons - 1);
+    startPage = Math.Max(1, endPage - maxPageButtons + 1);
+
+    var queryParams = new Dictionary<string, string>
+{
+        { "searchName", ViewData["CurrentFilter"]?.ToString() ?? "" },
+        { "orderFilter", ViewData["CurrentOrder"]?.ToString() ?? "" },
+        { "dateFilter", ViewData["CurrentDateFilter"]?.ToString() ?? "" },
+        { "actionType", ViewData["currentActionType"]?.ToString() ?? "" }
+    };
+}
+
+<div class="d-flex justify-content-center my-3">
+    <!-- Botón Anterior -->
+    <a asp-action="Index"
+       asp-all-route-data="queryParams"
+       asp-route-numpag="@(currentPage - 1)"
+       class="btn btn-primary @(currentPage <= 1 ? "disabled" : "")">
+        Back
+    </a>
+
+    @if (startPage > 1)
+    {
+        <a asp-action="Index" asp-all-route-data="queryParams" asp-route-numpag="1" class="btn btn-outline-primary mx-1">1</a>
+        @if (startPage > 2)
+        {<span class="mx-1">...</span>}
+    }
+
+    @for (var i = startPage; i <= endPage; i++)
+    {
+        <a asp-action="Index"
+           asp-all-route-data="queryParams"
+           asp-route-numpag="@i"
+           class="btn btn-outline-primary mx-1 @(i == currentPage ? "active" : "")">@i</a>
+    }
+
+    @if (endPage < totalPages)
+    {
+        @if (endPage < totalPages - 1)
+        {<span class="mx-1">...</span>}
+        <a asp-action="Index" asp-all-route-data="queryParams" asp-route-numpag="@totalPages" class="btn btn-outline-primary mx-1">@totalPages</a>
+    }
+
+    <!-- Botón Siguiente -->
+    <a asp-action="Index"
+       asp-all-route-data="queryParams"
+       asp-route-numpag="@(currentPage + 1)"
+       class="btn btn-primary @(currentPage >= totalPages ? "disabled" : "")">
+        Next
+    </a>
+</div>

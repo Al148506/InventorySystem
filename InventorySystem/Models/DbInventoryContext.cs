@@ -176,7 +176,11 @@ public partial class DbInventoryContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         var connectionString = _configuration.GetConnectionString("DbContext");
-        optionsBuilder.UseSqlServer(connectionString);
+        optionsBuilder.UseSqlServer(connectionString, options =>
+        {
+            options.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+        });
+
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
