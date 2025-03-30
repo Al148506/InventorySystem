@@ -3,7 +3,8 @@ name: Keep Azure SQL Alive
 on:
   schedule:
     - cron: '*/10 * * * *'  # Ejecuta cada 10 minutos
-
+  workflow_dispatch:  # Permite ejecutar manualmente
+  
 jobs:
   keep-db-alive:
     runs-on: ubuntu-latest
