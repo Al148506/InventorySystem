@@ -27,10 +27,6 @@
                 <label for="actionType">Action Type</label>
                 <select name="actionType" class="form-control" asp-items="ViewBag.typeAction">
                     <option value="">-- Select --</option>
-                    @if (ViewData["currentActionType"] != null)
-                    {
-                        <option selected value="@ViewData["currentActionType"]">@ViewData["currentActionType"]</option>
-                    }
                 </select>
             </div>
         </div>

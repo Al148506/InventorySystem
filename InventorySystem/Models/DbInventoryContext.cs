@@ -55,19 +55,19 @@ public partial class DbInventoryContext : DbContext
             switch (entry.State)
             {
                 case EntityState.Added:
-                    auditEntry.TypeAction = "Creación";
+                    auditEntry.TypeAction = "Create";
                     auditEntry.NewValues = SerializeProperties(GetAddedProperties(entry));
                     break;
 
                 case EntityState.Modified:
-                    auditEntry.TypeAction = "Actualización";
+                    auditEntry.TypeAction = "Update";
                     auditEntry.OldValues = SerializeProperties(GetOriginalValues(entry));
                     auditEntry.NewValues = SerializeProperties(GetCurrentValues(entry));
                     auditEntry.AffectedColumns = GetModifiedColumns(entry);
                     break;
 
                 case EntityState.Deleted:
-                    auditEntry.TypeAction = "Eliminación";
+                    auditEntry.TypeAction = "Delete";
                     auditEntry.OldValues = SerializeProperties(GetDeletedProperties(entry));
                     break;
             }

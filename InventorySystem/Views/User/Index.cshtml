@@ -90,9 +90,9 @@
 
                     <td> @Html.DisplayFor(m => user.CreationDate)</td>
 
-                    <td> @(user.LastModDate == null ? "Sin modificación" : Html.DisplayFor(m => user.LastModDate)) </td>
+                    <td> @(user.LastModDate == null ? "Without modification" : Html.DisplayFor(m => user.LastModDate)) </td>
 
-                    <td> @(user.IdRol == null ? "Sin modificación" : Html.DisplayFor(m => user.IdRolNavigation.RolName))</td>
+                    <td> @(user.IdRol == null ? "Without modification" : Html.DisplayFor(m => user.IdRolNavigation.RolName))</td>
 
                     <td>
                         <div class="d-flex gap-2">

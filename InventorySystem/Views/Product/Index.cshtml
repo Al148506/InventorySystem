@@ -63,7 +63,7 @@
         </div>
         <!-- Forzar salto de línea -->
         @*<div class="w-100"></div>*@
-        @if (!(bool)ViewData["Is64Bit"])
+        @if ((bool)ViewData["Is64Bit"])
         {
             <div class="me-2">
                 <div class="form-group">

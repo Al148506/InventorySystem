@@ -25,15 +25,18 @@ namespace InventorySystem.Controllers
                 .OrderByDescending(log => log.DateMod)
                 .AsQueryable();
 
-            // Obtener valores únicos de ActionType
-            var actionTypes = await _context.ChangeLogs
-                .Where(log => log.TypeAction != null)
-                .Select(log => log.TypeAction)
-                .Distinct()
-                .OrderBy(type => type)
-                .ToListAsync();
-            // Pasar los valores únicos a la vista
-            ViewBag.typeAction = new SelectList(actionTypes);
+            // Definir los tipos de acción manualmente
+            var actionTypes = new List<string> { "Create" ,"Update", "Delete"};
+
+            // Si hay un tipo de acción seleccionado, mantenerlo entre peticiones
+            if (string.IsNullOrEmpty(actionType))
+            {
+                actionType = currentActionType; // Usar el tipo de acción anterior si no hay uno nuevo
+            }
+
+            // Crear SelectList con elemento seleccionado
+            ViewBag.typeAction = new SelectList(actionTypes, actionType);
+            ViewData["currentActionType"] = actionType; // Guardar para mantener estado entre peticiones
 
             // Si hay una nueva búsqueda, reinicia la página a 1
             if (!string.IsNullOrEmpty(searchName))
@@ -44,7 +47,6 @@ namespace InventorySystem.Controllers
             {
                 searchName = currentFilter; // Usar el filtro actual si no hay nueva búsqueda
             }
-
             ViewData["CurrentFilter"] = searchName;
 
             // Aplicar búsqueda por nombre
@@ -53,18 +55,11 @@ namespace InventorySystem.Controllers
                 logsQuery = logsQuery.Where(p => p.UserId.Contains(searchName));
             }
 
-            // Aplicar búsqueda por Action TYpe
+            // Aplicar búsqueda por Action Type
             if (!string.IsNullOrEmpty(actionType))
             {
                 logsQuery = logsQuery.Where(p => p.TypeAction == actionType);
-                ViewData["currentActionType"] = actionType; // Guarda el filtro actual
             }
-            else
-            {
-                actionType = currentActionType; // Mantener el orden actual si no se proporciona uno nuevo
-                ViewData["currentActionType"] = currentActionType; // Asegúrate de que se pase a la vista
-            }
-
 
             // Orden dinámico
             if (!string.IsNullOrEmpty(orderFilter))
@@ -80,7 +75,6 @@ namespace InventorySystem.Controllers
             {
                 orderFilter = currentOrder; // Mantener el orden actual si no se proporciona uno nuevo
             }
-
             ViewData["CurrentOrder"] = orderFilter;
 
             // Lista de opciones para el orden
