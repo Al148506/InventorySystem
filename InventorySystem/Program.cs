@@ -52,4 +52,16 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Login}/{action=Index}/{id?}");
 
+app.MapControllerRoute(
+    name: "product",
+    pattern: "products/{action=Index}/{id?}",
+    defaults: new { controller = "Product" });
+
+app.MapControllerRoute(
+    name: "producttest",
+    pattern: "producttest/{action=Index}/{id?}",
+    defaults: new { controller = "ProductTest" });
+
+
+
 app.Run();

@@ -63,7 +63,7 @@
         </div>
         <!-- Forzar salto de línea -->
         @*<div class="w-100"></div>*@
-        @if (!(bool)ViewData["Is64Bit"])
+        @if (ViewData["Is64Bit"] != null && (bool)ViewData["Is64Bit"])
         {
             <div class="me-2">
                 <div class="form-group">
@@ -75,9 +75,18 @@
         <div class="ms-auto">
             <div class="form-group">
                 <label>&nbsp;</label>
-                <a asp-controller="Product" asp-action="Create" class="btn btn-success form-control">
-                    Create Product
-                </a>
+                @if (ViewData["IsTest"] != null && (bool)ViewData["IsTest"])
+                {
+                    <a asp-controller="ProductTest" asp-action="Create" class="btn btn-success form-control">
+                        Create Product
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Product" asp-action="Create" class="btn btn-success form-control">
+                        Create Product
+                    </a>
+                }
             </div>
         </div>
     </div>
@@ -99,50 +108,59 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var product in Model)
+            @if (Model != null)
+            {
+                @foreach (var product in Model)
+                {
+                    <tr>
+                        <td> @Html.DisplayFor(m => product.ProductName)</td>
+
+                        <td> @Html.DisplayFor(m => product.Category.CategoryName)</td>
+
+                        <td> @Html.DisplayFor(m => product.Description)</td>
+
+                        <td> @Html.DisplayFor(m => product.Quantity)</td>
+
+                        <td> @Html.DisplayFor(m => product.State)</td>
+
+                        <td> @Html.DisplayFor(m => product.Location.LocationName)</td>
+
+                        <td>
+                            @if (!string.IsNullOrEmpty(product.ImageRoot))
+                            {
+                                <img src="@product.ImageRoot" alt="Product Image" style="width: 100px; height: auto;" />
+                            }
+                            else
+                            {
+                                <span>No image</span>
+                            }
+                        </td>
+
+                        <td> @Html.DisplayFor(m => product.CreationDate)</td>
+
+                        <td> @Html.DisplayFor(m => product.LastModDate)</td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.IdProd" class="btn btn-primary">
+                                    Edit
+                                </a>
+                                <a asp-controller="Product" asp-action="Delete" asp-route-id="@product.IdProd" onclick="return confirmar()" class="btn btn-danger">
+                                    Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
             {
                 <tr>
-                    <td> @Html.DisplayFor(m => product.ProductName)</td>
-
-                    <td> @Html.DisplayFor(m => product.Category.CategoryName)</td>
-
-                    <td> @Html.DisplayFor(m => product.Description)</td>
-
-                    <td> @Html.DisplayFor(m => product.Quantity)</td>
-
-                    <td> @Html.DisplayFor(m => product.State)</td>
-
-                    <td> @Html.DisplayFor(m => product.Location.LocationName)</td>
-
-                    <td>
-                        @if (!string.IsNullOrEmpty(product.ImageRoot))
-                        {
-                            <img src="@product.ImageRoot" alt="Product Image" style="width: 100px; height: auto;" />
-                        }
-                        else
-                        {
-                            <span>No image</span>
-                        }
-                    </td>
-
-                    <td> @Html.DisplayFor(m => product.CreationDate)</td>
-
-                    <td> @Html.DisplayFor(m => product.LastModDate)</td>
-                    <td>
-                        <div class="d-flex gap-2">
-                            <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.IdProd" class="btn btn-primary">
-                                Edit
-                            </a>
-                            <a asp-controller="Product" asp-action="Delete" asp-route-id="@product.IdProd" onclick="return confirmar()" class="btn btn-danger">
-                                Delete
-                            </a>
-                        </div>
-                    </td>
+                    <td colspan="10" class="text-center">No products available</td>
                 </tr>
-
             }
         </tbody>
     </table>
+</div>
     <!-- Paginacion -->
     @await Html.PartialAsync("_Pagination", Model)
 
