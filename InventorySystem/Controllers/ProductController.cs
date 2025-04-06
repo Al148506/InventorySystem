@@ -13,11 +13,11 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace InventorySystem.Controllers
 {
-    public class ProductController : Controller
+    public class ProductController :BaseController
     {
         private readonly DbInventoryContext _context;
         private readonly IConverter _converter;
-        public ProductController(DbInventoryContext context, IConverter converter)
+        public ProductController(DbInventoryContext context, IConverter converter, IWebHostEnvironment env) : base(env)
         {
             _context = context;
             _converter = converter;
@@ -25,7 +25,7 @@ namespace InventorySystem.Controllers
         public async Task<IActionResult> Index(string searchName, int? categoryId, int? locationId, int? numpag, string currentFilter, string currentCategory, string currentLocation, 
             string dateFilter, string orderFilter , string currentDate, string currentOrder)
         {
-
+            if (IsStaging()) return RedirectToAction("Create", "ProductTest");
             ViewData["Is64Bit"] = Environment.Is64BitProcess;
             // Obtener todos los productos
             var productsQuery = _context.Products
@@ -105,6 +105,7 @@ namespace InventorySystem.Controllers
         [HttpGet]
         public IActionResult Create()
         {
+            if (IsStaging()) return RedirectToAction("Create", "ProductTest");
             ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName");
             ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName");
             ViewData["State"] = GetStateItems();
@@ -117,6 +118,7 @@ namespace InventorySystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductViewModel model, IFormFile Image)
         {
+            if (IsStaging()) return RedirectToAction("Create", "ProductTest");
             ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName");
             ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName");
             ViewData["State"] = GetStateItems();
@@ -189,6 +191,7 @@ namespace InventorySystem.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
+            if (IsStaging()) return RedirectToAction("Create", "ProductTest");
             var product = await _context.Products.FindAsync(id);
             if (product == null)
             {
@@ -217,6 +220,7 @@ namespace InventorySystem.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(Product product, IFormFile Image)
         {
+            if (IsStaging()) return RedirectToAction("Create", "ProductTest");
             if (Image != null)
             {
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
@@ -256,6 +260,7 @@ namespace InventorySystem.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
+            if (IsStaging()) return RedirectToAction("Create", "ProductTest");
             Product product = await _context.Products.FirstAsync
                 (p => p.IdProd == id);
             _context.Products.Remove(product);
@@ -277,6 +282,7 @@ namespace InventorySystem.Controllers
 
         public IActionResult GeneratePdf()
         {
+            if (IsStaging()) return RedirectToAction("Create", "ProductTest");
             // Obtener todos los datos de la tabla ChangeLog
             var products = _context.Products
                 .Include(p => p.Category)

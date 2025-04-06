@@ -33,5 +33,22 @@ namespace InventorySystem.Data
             // Retornar la instancia de la clase Pagination
             return new Pagination<T>(items, counter, initialPage, regQuantity);
         }
+
+        public static async Task<Pagination<T>> CreatePagination(List<T> source, int initialPage, int regQuantity)
+        {
+            // Manejo seguro de valores nulos en la consulta
+            var safeSource = source.Select(item => item == null ? (T)(object)new { } : item).ToList(); // Crear una proyección segura si es necesario
+
+            var counter = safeSource.Count(); // Contar los elementos en la fuente
+
+            // Aplicar paginación y manejar valores nulos al materializar la consulta
+            var items = safeSource
+                .Skip((initialPage - 1) * regQuantity)
+                .Take(regQuantity)
+                .ToList();
+
+            // Retornar la instancia de la clase Pagination
+            return await Task.FromResult(new Pagination<T>(items, counter, initialPage, regQuantity));
+        }
     }
 }
