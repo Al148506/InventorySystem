@@ -18,10 +18,10 @@ namespace InventorySystem.Models.ViewModels
         public string? State { get; set; }
         [Required]
         [Display(Name = "Category")]
-        public int? IdCategory { get; set; }
+        public int IdCategory { get; set; }
         [Required]
         [Display(Name = "Location")]
-        public int? IdLocation { get; set; }
+        public int IdLocation { get; set; }
 
         public DateTime? CreationDate { get; set; }
 

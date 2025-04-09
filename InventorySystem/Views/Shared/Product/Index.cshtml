@@ -138,7 +138,12 @@
 
                         <td> @Html.DisplayFor(m => product.CreationDate)</td>
 
-                        <td> @Html.DisplayFor(m => product.LastModDate)</td>
+                        <td>
+                            @(product.LastModDate.HasValue
+                            ? product.LastModDate.Value.ToString("dd/MM/yyyy HH:mm")
+                            : "No modificado")
+                        </td>
+
                         <td>
                             <div class="d-flex gap-2">
                                 <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.IdProd" class="btn btn-primary">

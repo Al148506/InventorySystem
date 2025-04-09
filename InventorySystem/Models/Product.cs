@@ -15,7 +15,7 @@ public partial class Product
 
     public string? State { get; set; }
 
-    public int? IdCategory { get; set; }
+    public int IdCategory { get; set; }
 
     public DateTime? CreationDate { get; set; }
 
@@ -23,11 +23,11 @@ public partial class Product
 
     public string? ImageRoot { get; set; }
 
-    public int? IdLocation { get; set; }
+    public int IdLocation { get; set; }
 
     public virtual ICollection<History> Histories { get; set; } = new List<History>();
 
-    public virtual Category? Category{ get; set; }
+    public virtual Category Category{ get; set; }
 
-    public virtual Location? Location { get; set; }
+    public virtual Location Location { get; set; }
 }

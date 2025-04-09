@@ -4,15 +4,16 @@ namespace InventorySystem.Controllers
 {
     public class BaseController : Controller
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
         protected readonly IWebHostEnvironment _env;
 
         public BaseController(IWebHostEnvironment env)
         {
             _env = env;
+        }
+
+        public IActionResult Index()
+        {
+            return View();
         }
 
         protected bool IsStaging()
@@ -29,5 +30,18 @@ namespace InventorySystem.Controllers
         {
             return _env.EnvironmentName == "Production";
         }
+
+        protected ViewResult SharedView(string folder, string viewName, object model = null)
+        {
+            var viewPath = $"~/Views/Shared/{folder}/{viewName}.cshtml";
+            return View(viewPath, model);
+        }
+
+        protected ViewResult SharedProductView(string viewName, object model = null)
+        {
+            return SharedView("Product", viewName, model);
+        }
+
+
     }
 }

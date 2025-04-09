@@ -6,34 +6,31 @@ using InventorySystem.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics.Eventing.Reader;
-using System.Linq;
-using System.Text;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace InventorySystem.Controllers
 {
+    [Route("product")]
     public class ProductController : BaseController
     {
         private readonly DbInventoryContext _context;
         private readonly IConverter _converter;
+
         public ProductController(DbInventoryContext context, IConverter converter, IWebHostEnvironment env) : base(env)
         {
             _context = context;
             _converter = converter;
         }
-        [Route("products/index")]
-        public async Task<IActionResult> Index(string searchName, int? categoryId, int? locationId, int? numpag, string currentFilter, string currentCategory, string currentLocation, 
-            string dateFilter, string orderFilter , string currentDate, string currentOrder)
+
+        [HttpGet("index")]
+        [HttpGet]
+        public async Task<IActionResult> Index(string searchName, int? categoryId, int? locationId, int? numpag, string currentFilter, string currentCategory, string currentLocation,
+            string dateFilter, string orderFilter, string currentDate, string currentOrder)
         {
             if (Environment.Is64BitProcess) return RedirectToAction("Index", "ProductTest");
             ViewData["Is64Bit"] = Environment.Is64BitProcess;
-            // Obtener todos los productos
-            var productsQuery = _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Location)
-                .AsQueryable();
-            //Paginacion
+
+            var productsQuery = _context.Products.Include(p => p.Category).Include(p => p.Location).AsQueryable();
+
             if (!string.IsNullOrEmpty(searchName))
             {
                 numpag = 1;
@@ -42,26 +39,17 @@ namespace InventorySystem.Controllers
             {
                 searchName = currentFilter;
             }
+
             ViewData["CurrentFilter"] = searchName;
-            // Filtrar por nombre
             if (!string.IsNullOrEmpty(searchName))
-            {
                 productsQuery = productsQuery.Where(p => p.ProductName.Contains(searchName));
-            }
 
-            // Filtrar por categoría
             if (categoryId.HasValue)
-            {
                 productsQuery = productsQuery.Where(p => p.IdCategory == categoryId.Value);
-            }
 
-            // Filtrar por ubicación
             if (locationId.HasValue)
-            {
                 productsQuery = productsQuery.Where(p => p.IdLocation == locationId.Value);
-            }
 
-            // Aplicar ordenamiento dinámico
             if (!string.IsNullOrEmpty(orderFilter) && !string.IsNullOrEmpty(dateFilter))
             {
                 productsQuery = (orderFilter, dateFilter) switch
@@ -70,66 +58,53 @@ namespace InventorySystem.Controllers
                     ("desc", "creation") => productsQuery.OrderByDescending(p => p.CreationDate),
                     ("asc", "modification") => productsQuery.OrderBy(p => p.LastModDate),
                     ("desc", "modification") => productsQuery.OrderByDescending(p => p.LastModDate),
-                    _ => productsQuery // Mantener sin cambios si no coincide ningún filtro
+                    _ => productsQuery
                 };
-
             }
 
-            // Preparar las listas para los SelectList conservando valores seleccionados
-            ViewBag.dateFilter = new SelectList(new[]
-            {
+            ViewBag.dateFilter = new SelectList(new[] {
                 new { Text = "Creation Date", Value = "creation" },
                 new { Text = "Last Modification Date", Value = "modification" }
-            }, "Value", "Text", dateFilter); // Selección actual
+            }, "Value", "Text", dateFilter);
 
-                    ViewBag.orderFilter = new SelectList(new[]
-                    {
+            ViewBag.orderFilter = new SelectList(new[] {
                 new { Text = "Ascendent Order", Value = "asc" },
                 new { Text = "Descendent Order", Value = "desc" }
-            }, "Value", "Text", orderFilter); // Selección actual
-            //Mantiene los filtros durante paginacion
+            }, "Value", "Text", orderFilter);
+
             ViewData["CurrentCategory"] = categoryId;
             ViewData["CurrentLocation"] = locationId;
             ViewData["currentDate"] = dateFilter;
             ViewData["currentOrder"] = orderFilter;
 
-            // Pasar datos a la vista
-            ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName",categoryId);
-            ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName",locationId);
+            LoadSelectLists(categoryId, locationId);
 
-            //var products = await productsQuery.ToListAsync();
             int regQuantity = 6;
-            return View(await Pagination<Product>.CreatePagination(productsQuery.AsNoTracking(), numpag ?? 1, regQuantity));
-      
+            return SharedProductView("Index",await Pagination<Product>.CreatePagination(productsQuery.AsNoTracking(), numpag ?? 1, regQuantity));
         }
-       
+
+        [HttpGet("create")]
         [HttpGet]
-        [Route("products/create")]
         public IActionResult Create()
         {
-            if (IsStaging()) return RedirectToAction("Create", "ProductTest");
-            ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName");
-            ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName");
-            ViewData["State"] = GetStateItems();
-
-            return View();
+            if (Environment.Is64BitProcess) return RedirectToAction("Create", "ProductTest");
+            LoadSelectLists();
+            return SharedProductView("Create");
         }
-       
+
+        [HttpPost("create")]
         [HttpPost]
-        [Route("products/create")]
-        //Para asegurar de recibir la informacion de nuestro propio formulario
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductViewModel model, IFormFile Image)
         {
-            if (IsStaging()) return RedirectToAction("Create", "ProductTest");
-            ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName");
-            ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName");
-            ViewData["State"] = GetStateItems();
+            if (Environment.Is64BitProcess) return RedirectToAction("Create", "ProductTest");
+            LoadSelectLists(model.IdCategory, model.IdLocation);
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                        var product = new Product()
+                    var product = new Product
                     {
                         ProductName = model.ProductName,
                         Description = model.Description,
@@ -140,31 +115,10 @@ namespace InventorySystem.Controllers
                         CreationDate = DateTime.Now,
                         LastModDate = DateTime.Now
                     };
-                    if (Image != null)
+
+                    if (Image != null && await SaveImageAsync(Image) is string imagePath)
                     {
-                        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                        var extension = Path.GetExtension(Image.FileName).ToLower();
-
-                        if (!allowedExtensions.Contains(extension))
-                        {
-                            ModelState.AddModelError("Image", "Por favor, sube un archivo de imagen válido (jpg, png, gif).");
-                            return View(model);
-                        }
-
-                        // Crear un nombre único para la imagen
-                        var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(Image.FileName)}";
-
-                        // Ruta completa del archivo
-                        var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images", fileName);
-
-                        // Guardar la imagen en la carpeta
-                        using (var stream = new FileStream(path, FileMode.Create))
-                        {
-                            await Image.CopyToAsync(stream);
-                        }
-
-                        // Guardar la ruta relativa en la base de datos
-                        product.ImageRoot = $"/Images/{fileName}";
+                        product.ImageRoot = imagePath;
                     }
 
                     _context.Add(product);
@@ -173,38 +127,25 @@ namespace InventorySystem.Controllers
                 }
                 catch (Exception ex)
                 {
-                    // Captura de errores y registro del mensaje
                     ModelState.AddModelError(string.Empty, $"Error al guardar el producto: {ex.Message}");
-                    return View(model);
                 }
             }
-            else
-            {
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    Console.WriteLine($"Error: {error.ErrorMessage}");
-                }
-                ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName");
-                ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName");
-                return View(model);
-            }
-          
+
+            return SharedProductView("Create",model);
         }
 
+        [HttpGet("edit/{id}")]
         [HttpGet]
-        [Route("products/edit")]
         public async Task<IActionResult> Edit(int id)
         {
-            if (IsStaging()) return RedirectToAction("Edit", "ProductTest");
+            if (Environment.Is64BitProcess) return RedirectToAction("Edit", "ProductTest", new { id = id });
+
             var product = await _context.Products.FindAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            if (product == null) return NotFound();
 
             var model = new ProductViewModel
             {
-                IdProd= product.IdProd,
+                IdProd = product.IdProd,
                 ProductName = product.ProductName,
                 Description = product.Description,
                 Quantity = product.Quantity,
@@ -215,184 +156,86 @@ namespace InventorySystem.Controllers
                 LastModDate = product.LastModDate,
                 ImageRoot = product.ImageRoot
             };
-            ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName");
-            ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName");  
-            ViewData["State"] = GetStateItems(); 
-            return View(model);
-        }
 
+            LoadSelectLists(product.IdCategory, product.IdLocation);
+            return SharedProductView("Edit", model);
+        }
+        [HttpPost("edit/{id}")]
         [HttpPost]
-        [Route("products/edit")]
         public async Task<IActionResult> Edit(Product product, IFormFile Image)
         {
-            if (IsStaging()) return RedirectToAction("Edit", "ProductTest");
-            if (Image != null)
+            if (Environment.Is64BitProcess) return RedirectToAction("Edit", "ProductTest");
+
+            var existingProduct = await _context.Products.FindAsync(product.IdProd);
+            if (existingProduct == null) return NotFound();
+
+            existingProduct.ProductName = product.ProductName;
+            existingProduct.Description = product.Description;
+            existingProduct.Quantity = product.Quantity;
+            existingProduct.State = product.State;
+            existingProduct.IdCategory = product.IdCategory;
+            existingProduct.IdLocation = product.IdLocation;
+            existingProduct.LastModDate = DateTime.Now;
+
+            if (Image != null && await SaveImageAsync(Image) is string imagePath)
             {
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                var extension = Path.GetExtension(Image.FileName).ToLower();
-
-                if (!allowedExtensions.Contains(extension))
-                {
-                    ModelState.AddModelError("Image", "Por favor, sube un archivo de imagen válido (jpg, png, gif).");
-                    return View(product);
-                }
-
-                // Crear un nombre único para la imagen
-                var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(Image.FileName)}";
-
-                // Ruta completa del archivo
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images", fileName);
-
-                // Guardar la imagen en la carpeta
-                using (var stream = new FileStream(path, FileMode.Create))
-                {
-                    await Image.CopyToAsync(stream);
-                }
-
-                // Guardar la ruta relativa en la base de datos
-                product.ImageRoot = $"/Images/{fileName}";
+                existingProduct.ImageRoot = imagePath;
             }
-            product.LastModDate = DateTime.Now;
-            _context.Products.Update(product);
-            await _context.SaveChangesAsync();
-            ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName");
-            ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName");
-            ViewData["State"] = GetStateItems();
+            LoadSelectLists(product.IdCategory, product.IdLocation);
 
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-           
         }
+
+        [HttpGet("delete/{id}")]
         [HttpGet]
-        [Route("products/delete")]
         public async Task<IActionResult> Delete(int id)
         {
-            if (IsStaging()) return RedirectToAction("Delete", "ProductTest");
-            Product product = await _context.Products.FirstAsync
-                (p => p.IdProd == id);
+            if (Environment.Is64BitProcess) return RedirectToAction("Delete", "ProductTest");
+
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.IdProd == id);
+            if (product == null) return NotFound();
+
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-        private List<SelectListItem> GetStateItems()
+
+        private void LoadSelectLists(int? categoryId = null, int? locationId = null)
         {
-            return new List<SelectListItem>
-    {
-        new SelectListItem { Text = "New", Value = "New" },
-        new SelectListItem { Text = "Excellent", Value = "Excellent" },
-        new SelectListItem { Text = "Very Good", Value = "Very Good" },
-        new SelectListItem { Text = "Good", Value = "Good" },
-        new SelectListItem { Text = "Used", Value = "Used" },
-        new SelectListItem { Text = "For parts or not working", Value = "For parts or not working" }
-    };
+            ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName", categoryId);
+            ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName", locationId);
+            ViewData["State"] = GetStateItems();
         }
 
-        public IActionResult GeneratePdf()
+        private List<SelectListItem> GetStateItems() => new List<SelectListItem>
         {
-            // Obtener todos los datos de la tabla ChangeLog
-            var products = _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Location)
-                .AsNoTracking()
-                .ToList();
+            new SelectListItem { Text = "New", Value = "New" },
+            new SelectListItem { Text = "Excellent", Value = "Excellent" },
+            new SelectListItem { Text = "Very Good", Value = "Very Good" },
+            new SelectListItem { Text = "Good", Value = "Good" },
+            new SelectListItem { Text = "Used", Value = "Used" },
+            new SelectListItem { Text = "For parts or not working", Value = "For parts or not working" }
+        };
 
+        private async Task<string?> SaveImageAsync(IFormFile image)
+        {
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+            var extension = Path.GetExtension(image.FileName).ToLower();
 
-            // Construir el contenido HTML para el PDF usando StringBuilder para mejorar el rendimiento
-            var htmlContent = new StringBuilder();
-            htmlContent.Append(@"
-        <html>
-        <head>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    margin: 0;
-                    padding: 0;
-                }
-                h1 {
-                    text-align: center;
-                    font-size: 24px;
-                    margin-bottom: 20px;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    table-layout: fixed;
-                }
-                th, td {
-                    border: 1px solid #ddd;
-                    padding: 8px;
-                    text-align: left;
-                    word-wrap: break-word; /* Evita desbordamientos en las celdas */
-                }
-                th {
-                    background-color: #f2f2f2;
-                    font-weight: bold;
-                }
-                tr {
-                    page-break-inside: avoid; /* Evita que una fila se corte entre páginas */
-                }
-            </style>
-        </head>
-        <body>
-            <h1>Products Report</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ProductName</th>
-                        <th>Quantity</th>
-                        <th>CategoryName</th>
-                        <th>LocationName</th>
-                        <th>State</th>
-                        <th>Description</th>
-                        <th>CreationDate</th>
-                        <th>LastModDate</th>
-                    </tr>
-                </thead>
-                <tbody>");
-
-            foreach (var product in products)
+            if (!allowedExtensions.Contains(extension) || !image.ContentType.StartsWith("image/"))
             {
-                htmlContent.Append("<tr>")
-                           .AppendFormat("<td>{0}</td>", product.ProductName)
-                           .AppendFormat("<td>{0}</td>", product.Quantity)
-                            .AppendFormat("<td>{0}</td>", product.Category.CategoryName)
-                           .AppendFormat("<td>{0}</td>", product.Location.LocationName)
-                           .AppendFormat("<td>{0}</td>", product.State)
-                           .AppendFormat("<td>{0}</td>", product.Description)
-                           .AppendFormat("<td>{0:yyyy-MM-dd HH:mm:ss}</td>", product.CreationDate)
-                           .AppendFormat("<td>{0}</td>", product.LastModDate?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Whithout modifications")
-                           .Append("</tr>");
+                ModelState.AddModelError("Image", "Por favor, sube un archivo de imagen válido (jpg, png, gif).\n");
+                return null;
             }
 
-            htmlContent.Append(@"
-                </tbody>
-            </table>
-        </body>
-        </html>");
+            var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(image.FileName)}";
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images", fileName);
 
-            // Configurar el documento PDF
-            var pdfDoc = new HtmlToPdfDocument
-            {
-                GlobalSettings = new GlobalSettings
-                {
-                    ColorMode = ColorMode.Color,
-                    Orientation = Orientation.Landscape,
-                    PaperSize = PaperKind.A4,
-                    Margins = new MarginSettings { Top = 10, Bottom = 10, Left = 10, Right = 10 },
-                }
-            };
+            using var stream = new FileStream(path, FileMode.Create);
+            await image.CopyToAsync(stream);
 
-            pdfDoc.Objects.Add(new ObjectSettings
-            {
-                HtmlContent = htmlContent.ToString(),
-                WebSettings = { DefaultEncoding = "utf-8" }
-            });
-
-            // Convertir a PDF
-            var pdf = _converter.Convert(pdfDoc);
-
-            // Retornar el PDF como archivo descargable
-            return File(pdf, "application/pdf", "ChangeLog.pdf");
+            return $"/Images/{fileName}";
         }
-
     }
 }

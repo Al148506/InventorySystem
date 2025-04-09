@@ -1,5 +1,4 @@
-﻿using DinkToPdf.Contracts;
-using InventorySystem.Data;
+﻿using InventorySystem.Data;
 using InventorySystem.Models;
 using InventorySystem.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -9,12 +8,13 @@ using Newtonsoft.Json;
 
 namespace InventorySystem.Controllers
 {
-    public class ProductTestController : Controller
+    [Route("producttest")]
+    public class ProductTestController : BaseController
     {
         private const string SessionKey = "SessionProducts";
         private readonly DbInventoryContext _context;
 
-        public ProductTestController(DbInventoryContext context)
+        public ProductTestController(DbInventoryContext context, IWebHostEnvironment env) : base(env)
         {
             _context = context;
         }
@@ -36,103 +36,104 @@ namespace InventorySystem.Controllers
             var locations = _context.Locations.ToDictionary(l => l.IdLocation, l => l);
 
             var list = new List<Product>
-                {
-                    new Product
                     {
-                        IdProd = 1,
-                        ProductName = "Mesh",
-                        Description = "Internet mesh",
-                        Quantity = 100,
-                        State = "New",
-                        IdCategory = 5,
-                        CreationDate = new DateTime(2024, 11, 1),
-                        LastModDate = new DateTime(2025, 4, 1, 15, 57, 35, 500),
-                        ImageRoot = "/Images/20868f37-2fe6-4403-a91f-78e3c8d48530_decox50.jpg",
-                        IdLocation = 2,
-                        Category = categories.GetValueOrDefault(5),
-                        Location = locations.GetValueOrDefault(2)
-                    },
-                    new Product
-                    {
-                        IdProd = 2,
-                        ProductName = "Iphone 16",
-                        Description = "Premium",
-                        Quantity = 3,
-                        State = "New",
-                        IdCategory = 3,
-                        CreationDate = new DateTime(2024, 11, 1),
-                        LastModDate = new DateTime(2025, 4, 1, 15, 57, 22, 573),
-                        ImageRoot = "/Images/iphone16.png",
-                        IdLocation = 3,
-                        Category = categories.GetValueOrDefault(3),
-                        Location = locations.GetValueOrDefault(3)
-                    },
-                    new Product
-                    {
-                        IdProd = 3,
-                        ProductName = "Iphone Deco X50",
-                        Description = "Wifi mesh",
-                        Quantity = 4,
-                        State = "Good Condition",
-                        IdCategory = 3,
-                        CreationDate = new DateTime(2024, 11, 1),
-                        LastModDate = new DateTime(2024, 11, 1),
-                        ImageRoot = "/Images/decox50.jpg",
-                        IdLocation = 1,
-                        Category = categories.GetValueOrDefault(3),
-                        Location = locations.GetValueOrDefault(1)
-                    },
-                    new Product
-                    {
-                        IdProd = 4,
-                        ProductName = "Iphone Router Huaweii X6",
-                        Description = "Black color",
-                        Quantity = 3,
-                        State = "New",
-                        IdCategory = 3,
-                        CreationDate = new DateTime(2024, 11, 18, 15, 10, 36),
-                        LastModDate = new DateTime(2025, 4, 1, 15, 57, 7, 687),
-                        ImageRoot = "/Images/c81700a5-d7df-4d98-afc6-616ddf5c31e8_router.png",
-                        IdLocation = 5,
-                        Category = categories.GetValueOrDefault(3),
-                        Location = locations.GetValueOrDefault(5)
-                    },
-                    new Product
-                    {
-                        IdProd = 5,
-                        ProductName = "Iphone Xiaomi Poco x4",
-                        Description = "Cellphone",
-                        Quantity = 4,
-                        State = "New",
-                        IdCategory = 5,
-                        CreationDate = new DateTime(2024, 11, 18, 15, 24, 33),
-                        LastModDate = new DateTime(2025, 4, 1, 15, 56, 55, 550),
-                        ImageRoot = "/Images/xiaominote10s.jpg",
-                        IdLocation = 5,
-                        Category = categories.GetValueOrDefault(5),
-                        Location = locations.GetValueOrDefault(5)
-                    },
-                    new Product
-                    {
-                        IdProd = 7,
-                        ProductName = "Iphone Alienware Aurora R16",
-                        Description = "Gaming Desktop",
-                        Quantity = 3,
-                        State = "Excellent",
-                        IdCategory = 1,
-                        CreationDate = new DateTime(2024, 11, 18, 15, 10, 36),
-                        LastModDate = new DateTime(2025, 4, 1, 15, 56, 39, 163),
-                        ImageRoot = "/Images/d0654665-0cad-445c-9c01-1bda049d185c_alienware.jpg",
-                        IdLocation = 1,
-                        Category = categories.GetValueOrDefault(1),
-                        Location = locations.GetValueOrDefault(1)
-                    }
-                };
+                        new Product
+                        {
+                            IdProd = 1,
+                            ProductName = "Mesh",
+                            Description = "Internet mesh",
+                            Quantity = 100,
+                            State = "New",
+                            IdCategory = 5,
+                            CreationDate = new DateTime(2024, 11, 1),
+                            LastModDate = new DateTime(2025, 4, 1, 15, 57, 35, 500),
+                            ImageRoot = "/Images/20868f37-2fe6-4403-a91f-78e3c8d48530_decox50.jpg",
+                            IdLocation = 2,
+                            Category = categories.GetValueOrDefault(5),
+                            Location = locations.GetValueOrDefault(2)
+                        },
+                        new Product
+                        {
+                            IdProd = 2,
+                            ProductName = "Iphone 16",
+                            Description = "Premium",
+                            Quantity = 3,
+                            State = "New",
+                            IdCategory = 3,
+                            CreationDate = new DateTime(2024, 11, 1),
+                            LastModDate = new DateTime(2025, 4, 1, 15, 57, 22, 573),
+                            ImageRoot = "/Images/iphone16.png",
+                            IdLocation = 3,
+                            Category = categories.GetValueOrDefault(3),
+                            Location = locations.GetValueOrDefault(3)
+                        },
+                        new Product
+                        {
+                            IdProd = 3,
+                            ProductName = "Iphone Deco X50",
+                            Description = "Wifi mesh",
+                            Quantity = 4,
+                            State = "Good Condition",
+                            IdCategory = 3,
+                            CreationDate = new DateTime(2024, 11, 1),
+                            LastModDate = new DateTime(2024, 11, 1),
+                            ImageRoot = "/Images/decox50.jpg",
+                            IdLocation = 1,
+                            Category = categories.GetValueOrDefault(3),
+                            Location = locations.GetValueOrDefault(1)
+                        },
+                        new Product
+                        {
+                            IdProd = 4,
+                            ProductName = "Iphone Router Huaweii X6",
+                            Description = "Black color",
+                            Quantity = 3,
+                            State = "New",
+                            IdCategory = 3,
+                            CreationDate = new DateTime(2024, 11, 18, 15, 10, 36),
+                            LastModDate = new DateTime(2025, 4, 1, 15, 57, 7, 687),
+                            ImageRoot = "/Images/c81700a5-d7df-4d98-afc6-616ddf5c31e8_router.png",
+                            IdLocation = 5,
+                            Category = categories.GetValueOrDefault(3),
+                            Location = locations.GetValueOrDefault(5)
+                        },
+                        new Product
+                        {
+                            IdProd = 5,
+                            ProductName = "Iphone Xiaomi Poco x4",
+                            Description = "Cellphone",
+                            Quantity = 4,
+                            State = "New",
+                            IdCategory = 5,
+                            CreationDate = new DateTime(2024, 11, 18, 15, 24, 33),
+                            LastModDate = new DateTime(2025, 4, 1, 15, 56, 55, 550),
+                            ImageRoot = "/Images/xiaominote10s.jpg",
+                            IdLocation = 5,
+                            Category = categories.GetValueOrDefault(5),
+                            Location = locations.GetValueOrDefault(5)
+                        },
+                        new Product
+                        {
+                            IdProd = 7,
+                            ProductName = "Iphone Alienware Aurora R16",
+                            Description = "Gaming Desktop",
+                            Quantity = 3,
+                            State = "Excellent",
+                            IdCategory = 1,
+                            CreationDate = new DateTime(2024, 11, 18, 15, 10, 36),
+                            LastModDate = new DateTime(2025, 4, 1, 15, 56, 39, 163),
+                            ImageRoot = "/Images/d0654665-0cad-445c-9c01-1bda049d185c_alienware.jpg",
+                            IdLocation = 1,
+                            Category = categories.GetValueOrDefault(1),
+                            Location = locations.GetValueOrDefault(1)
+                        }
+                    };
             SaveSessionProducts(list);
             return list;
         }
 
-        [Route("producttest/index")]
+        [HttpGet("index")]
+        [HttpGet]
         public async Task<IActionResult> Index(string searchName, int? categoryId, int? locationId, int? numpag, string currentFilter, string currentCategory, string currentLocation,
             string dateFilter, string orderFilter, string currentDate, string currentOrder)
         {
@@ -151,7 +152,7 @@ namespace InventorySystem.Controllers
 
             if (!string.IsNullOrEmpty(searchName))
             {
-                products = products.Where(p => p.ProductName.Contains(searchName, StringComparison.OrdinalIgnoreCase)).ToList();
+                products = products.Where(p => p.ProductName != null && p.ProductName.Contains(searchName, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
             if (categoryId.HasValue)
@@ -166,66 +167,82 @@ namespace InventorySystem.Controllers
 
             ViewData["CurrentCategory"] = categoryId;
             ViewData["CurrentLocation"] = locationId;
+            LoadSelectLists(categoryId, locationId);
 
-            ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName", categoryId);
-            ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName", locationId);
             ViewBag.dateFilter = new SelectList(new[]
             {
-                    new { Text = "Creation Date", Value = "creation" },
-                    new { Text = "Last Modification Date", Value = "modification" }
-                }, "Value", "Text", dateFilter);
+                        new { Text = "Creation Date", Value = "creation" },
+                        new { Text = "Last Modification Date", Value = "modification" }
+                    }, "Value", "Text", dateFilter);
 
             ViewBag.orderFilter = new SelectList(new[]
             {
-                    new { Text = "Ascendent Order", Value = "asc" },
-                    new { Text = "Descendent Order", Value = "desc" }
-                }, "Value", "Text", orderFilter);
+                        new { Text = "Ascendent Order", Value = "asc" },
+                        new { Text = "Descendent Order", Value = "desc" }
+                    }, "Value", "Text", orderFilter);
 
             int regQuantity = 6;
-            return View("~/Views/Shared/Product/Index.cshtml", await Pagination<Product>.CreatePagination(products, numpag ?? 1, regQuantity));
+            return SharedProductView("Index", await Pagination<Product>.CreatePagination(products, numpag ?? 1, regQuantity));
         }
 
+        [HttpGet("create")]
         [HttpGet]
-        [Route("producttest/create")]
         public IActionResult Create()
         {
             ViewData["Category"] = new SelectList(new[] { new { IdCategory = 1, CategoryName = "Accesorios" }, new { IdCategory = 2, CategoryName = "Periféricos" } }, "IdCategory", "CategoryName");
             ViewData["Location"] = new SelectList(new[] { new { IdLocation = 1, LocationName = "Almacén A" }, new { IdLocation = 2, LocationName = "Almacén B" } }, "IdLocation", "LocationName");
             ViewData["State"] = GetStateItems();
-            return View("~/Views/Shared/Product/Create.cshtml");
+            return SharedProductView("Create");
         }
-         [HttpPost]
-        [Route("producttest/create")]
-        public IActionResult Create(ProductViewModel model)
+        [HttpPost("create")]
+        [HttpPost]
+        public async Task<IActionResult> Create(ProductViewModel model, IFormFile? Image)
         {
             if (ModelState.IsValid)
             {
-                var products = GetSessionProducts();
-                int nextId = products.Any() ? products.Max(p => p.IdProd) + 1 : 1;
-
-                var newProduct = new Product
+                try
                 {
-                    IdProd = nextId,
-                    ProductName = model.ProductName,
-                    Description = model.Description,
-                    Quantity = model.Quantity,
-                    State = model.State,
-                    IdCategory = model.IdCategory,
-                    IdLocation = model.IdLocation,
-                    CreationDate = DateTime.Now
-                };
+                    var products = GetSessionProducts();
+                    int nextId = products.Any() ? products.Max(p => p.IdProd) + 1 : 1;
+                    var categories = _context.Categories.ToDictionary(c => c.IdCategory, c => c);
+                    var locations = _context.Locations.ToDictionary(l => l.IdLocation, l => l);
+                    var newProduct = new Product
+                    {
+                        IdProd = nextId,
+                        ProductName = model.ProductName,
+                        Description = model.Description,
+                        Quantity = model.Quantity,
+                        State = model.State,
+                        IdCategory = model.IdCategory,
+                        CreationDate = DateTime.Now,
+                        LastModDate = DateTime.Now,
+                        ImageRoot = "/Images/20868f37-2fe6-4403-a91f-78e3c8d48530_decox50.jpg",
+                        IdLocation = model.IdLocation,
+                        Category = categories.GetValueOrDefault(model.IdCategory),
+                        Location = locations.GetValueOrDefault(model.IdLocation)
+                    };
 
-                products.Add(newProduct);
-                SaveSessionProducts(products);
+                    if (Image != null && await SaveImageAsync(Image) is string imagePath)
+                    {
+                        newProduct.ImageRoot = imagePath;
+                    }
 
-                return RedirectToAction("Index");
+                    products.Add(newProduct);
+                    SaveSessionProducts(products);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError(string.Empty, $"Error al guardar el producto: {ex.Message}");
+                }
             }
-
-            return View("~/Views/Shared/Product/Create.cshtml", model);
+            return SharedProductView("Create", model);
         }
 
+     
+        [HttpGet("edit/{id}")]
         [HttpGet]
-        [Route("producttest/edit")]
         public IActionResult Edit(int id)
         {
             var products = GetSessionProducts();
@@ -250,11 +267,11 @@ namespace InventorySystem.Controllers
             ViewData["Location"] = new SelectList(new[] { new { IdLocation = 1, LocationName = "Almacén A" }, new { IdLocation = 2, LocationName = "Almacén B" } }, "IdLocation", "LocationName");
             ViewData["State"] = GetStateItems();
 
-            return View("~/Views/Shared/Product/Edit.cshtml", model);
+            return SharedProductView("Edit", model);
         }
 
+        [HttpPost("edit/{id}")]
         [HttpPost]
-        [Route("producttest/edit")]
         public IActionResult Edit(ProductViewModel model)
         {
             var products = GetSessionProducts();
@@ -271,11 +288,11 @@ namespace InventorySystem.Controllers
             product.LastModDate = DateTime.Now;
 
             SaveSessionProducts(products);
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet("delete/{id}")]
         [HttpGet]
-        [Route("producttest/delete")]
         public IActionResult Delete(int id)
         {
             var products = GetSessionProducts();
@@ -286,20 +303,46 @@ namespace InventorySystem.Controllers
                 SaveSessionProducts(products);
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
+        }
+
+        private void LoadSelectLists(int? categoryId = null, int? locationId = null)
+        {
+            ViewData["Category"] = new SelectList(_context.Categories, "IdCategory", "CategoryName", categoryId);
+            ViewData["Location"] = new SelectList(_context.Locations, "IdLocation", "LocationName", locationId);
+            ViewData["State"] = GetStateItems();
         }
 
         private List<SelectListItem> GetStateItems()
         {
             return new List<SelectListItem>
-                {
-                    new SelectListItem { Text = "New", Value = "New" },
-                    new SelectListItem { Text = "Excellent", Value = "Excellent" },
-                    new SelectListItem { Text = "Very Good", Value = "Very Good" },
-                    new SelectListItem { Text = "Good", Value = "Good" },
-                    new SelectListItem { Text = "Used", Value = "Used" },
-                    new SelectListItem { Text = "For parts or not working", Value = "For parts or not working" }
-                };
+                    {
+                        new SelectListItem { Text = "New", Value = "New" },
+                        new SelectListItem { Text = "Excellent", Value = "Excellent" },
+                        new SelectListItem { Text = "Very Good", Value = "Very Good" },
+                        new SelectListItem { Text = "Good", Value = "Good" },
+                        new SelectListItem { Text = "Used", Value = "Used" },
+                        new SelectListItem { Text = "For parts or not working", Value = "For parts or not working" }
+                    };
+        }
+        private async Task<string?> SaveImageAsync(IFormFile image)
+        {
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+            var extension = Path.GetExtension(image.FileName).ToLower();
+
+            if (!allowedExtensions.Contains(extension) || !image.ContentType.StartsWith("image/"))
+            {
+                ModelState.AddModelError("Image", "Por favor, sube un archivo de imagen válido (jpg, png, gif).\n");
+                return null;
+            }
+
+            var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(image.FileName)}";
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images", fileName);
+
+            using var stream = new FileStream(path, FileMode.Create);
+            await image.CopyToAsync(stream);
+
+            return $"/Images/{fileName}";
         }
     }
 }
